@@ -16,7 +16,6 @@ export class CartView extends LitElement {
     sharedStyles,
     css`
       :host {
-        padding-bottom: 90px;
         display: block;
       }
       .line {
@@ -84,30 +83,6 @@ export class CartView extends LitElement {
         padding-top: 10px;
         margin-top: 4px;
       }
-      .checkout-bar {
-        position: fixed;
-        left: 0;
-        right: 0;
-        bottom: calc(var(--nav-h) + var(--safe-b));
-        background: var(--bg-elevated);
-        border-top: 1px solid var(--border);
-        padding: 12px 16px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        z-index: 15;
-      }
-      .checkout-bar .total {
-        font: 800 15px var(--sans);
-      }
-      .checkout-bar .sub {
-        font-size: 11.5px;
-        color: var(--text-faint);
-      }
-      .checkout-bar button {
-        min-width: 140px;
-      }
     `,
   ];
 
@@ -163,16 +138,6 @@ export class CartView extends LitElement {
           <div class="row"><span>Delivery</span><span>Free</span></div>
           <div class="row total"><span>Total</span><span>₹${cartStore.subtotal.toLocaleString('en-IN')}</span></div>
         </div>
-      </div>
-
-      <div class="checkout-bar">
-        <div>
-          <div class="total">₹${cartStore.subtotal.toLocaleString('en-IN')}</div>
-          <div class="sub">${cartStore.count} item${cartStore.count === 1 ? '' : 's'}</div>
-        </div>
-        <button class="primary" @click=${() => (location.hash = '#/checkout')}>
-          Proceed to Checkout
-        </button>
       </div>
     `;
   }

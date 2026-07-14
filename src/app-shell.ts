@@ -8,20 +8,14 @@ import './views/home-view';
 import './views/shop-view';
 import './views/product-detail-view';
 import './views/cart-view';
-import './views/guest-checkout-view';
-import './views/checkout-view';
 import './views/wishlist-view';
-import './views/order-confirmation-view';
 
 type Route =
   | { name: 'home' }
   | { name: 'shop'; category: string }
   | { name: 'product'; id: string }
   | { name: 'cart' }
-  | { name: 'wishlist' }
-  | { name: 'checkoutGuest' }
-  | { name: 'checkoutAddress' }
-  | { name: 'order'; id: string };
+  | { name: 'wishlist' };
 
 function parseRoute(hash: string): Route {
   const path = hash.replace(/^#/, '');
@@ -36,10 +30,6 @@ function parseRoute(hash: string): Route {
       return { name: 'cart' };
     case 'wishlist':
       return { name: 'wishlist' };
-    case 'checkout':
-      return segs[1] === 'address' ? { name: 'checkoutAddress' } : { name: 'checkoutGuest' };
-    case 'order':
-      return segs[1] ? { name: 'order', id: segs[1] } : { name: 'home' };
     default:
       return { name: 'home' };
   }
@@ -105,11 +95,6 @@ export class AppShell extends LitElement {
     }
   }
 
-  private get showBottomNav() {
-    const hidden: Route['name'][] = ['checkoutGuest', 'checkoutAddress', 'order'];
-    return !hidden.includes(this.route.name);
-  }
-
   private topBarProps() {
     const route = this.route;
     switch (route.name) {
@@ -125,12 +110,6 @@ export class AppShell extends LitElement {
         return { showBack: false, showSearch: false, label: 'My Bag' };
       case 'wishlist':
         return { showBack: false, showSearch: false, label: 'Wishlist' };
-      case 'checkoutGuest':
-        return { showBack: true, showSearch: false, label: 'Checkout' };
-      case 'checkoutAddress':
-        return { showBack: true, showSearch: false, label: 'Delivery & Payment' };
-      case 'order':
-        return { showBack: false, showSearch: false, label: 'Order Confirmed' };
       default:
         return { showBack: false, showSearch: false, label: '' };
     }
@@ -147,7 +126,7 @@ export class AppShell extends LitElement {
         @search=${(e: CustomEvent) => (this.searchQuery = e.detail)}
       ></top-bar>
       <main>${this.renderRoute()}</main>
-      ${this.showBottomNav ? html`<bottom-nav .active=${this.activeTab}></bottom-nav>` : ''}
+      <bottom-nav .active=${this.activeTab}></bottom-nav>
     `;
   }
 
@@ -163,12 +142,6 @@ export class AppShell extends LitElement {
         return html`<cart-view></cart-view>`;
       case 'wishlist':
         return html`<wishlist-view></wishlist-view>`;
-      case 'checkoutGuest':
-        return html`<guest-checkout-view></guest-checkout-view>`;
-      case 'checkoutAddress':
-        return html`<checkout-view></checkout-view>`;
-      case 'order':
-        return html`<order-confirmation-view .orderId=${this.route.id}></order-confirmation-view>`;
     }
   }
 }

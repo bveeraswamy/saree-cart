@@ -2,12 +2,10 @@ import { LitElement, html, css, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { PRODUCTS } from '../data/products';
 import { sharedStyles } from '../styles/shared-styles';
-import { cartStore } from '../state/cart-store';
 import { wishlistStore } from '../state/wishlist-store';
 import { StoreController } from '../state/store-controller';
 import '../components/saree-swatch';
 import '../components/rating-stars';
-import '../components/qty-stepper';
 import '../components/product-grid';
 
 @customElement('product-detail-view')
@@ -15,12 +13,9 @@ export class ProductDetailView extends LitElement {
   @property() productId = '';
 
   @state() private colorIndex = 0;
-  @state() private qty = 1;
-  @state() private toast = '';
 
   // retains a StoreController subscription to re-render on store changes
   wishlist = new StoreController(this, wishlistStore);
-  private toastTimer?: ReturnType<typeof setTimeout>;
 
   static styles = [
     sharedStyles,
@@ -82,21 +77,16 @@ export class ProductDetailView extends LitElement {
         margin: 0 0 16px;
       }
       .actions {
-        display: flex;
-        gap: 10px;
-        align-items: center;
         margin: 18px 0 22px;
       }
-      .actions button.primary {
-        flex: 1;
-      }
       .wish-btn {
-        width: 44px;
-        height: 44px;
-        border-radius: 50%;
+        width: 100%;
+        height: 46px;
+        border-radius: var(--radius-sm);
         border: 1px solid var(--border);
         background: var(--bg-elevated);
-        font-size: 18px;
+        color: var(--text);
+        font: 700 14px var(--sans);
         cursor: pointer;
       }
       .wish-btn.active {
@@ -123,21 +113,6 @@ export class ProductDetailView extends LitElement {
         color: var(--text-dim);
         line-height: 1.8;
       }
-      .toast {
-        position: fixed;
-        left: 16px;
-        right: 16px;
-        bottom: calc(var(--nav-h) + var(--safe-b) + 12px);
-        background: var(--text);
-        color: var(--bg);
-        padding: 12px 16px;
-        border-radius: var(--radius-sm);
-        font-size: 13.5px;
-        font-weight: 600;
-        text-align: center;
-        z-index: 30;
-        box-shadow: var(--shadow);
-      }
       .missing {
         text-align: center;
         padding: 60px 20px;
@@ -149,21 +124,7 @@ export class ProductDetailView extends LitElement {
   willUpdate(changed: Map<string, unknown>) {
     if (changed.has('productId')) {
       this.colorIndex = 0;
-      this.qty = 1;
-      this.toast = '';
     }
-  }
-
-  disconnectedCallback() {
-    clearTimeout(this.toastTimer);
-    super.disconnectedCallback();
-  }
-
-  private addToCart(name: string, colorName: string) {
-    cartStore.add(this.productId, colorName, this.qty);
-    this.toast = `Added ${this.qty} × ${name} to your bag`;
-    clearTimeout(this.toastTimer);
-    this.toastTimer = setTimeout(() => (this.toast = ''), 2200);
   }
 
   render() {
@@ -211,16 +172,12 @@ export class ProductDetailView extends LitElement {
       <p class="note">${product.blousePieceIncluded ? '✓ Unstitched blouse piece included' : 'Sold without blouse piece'}</p>
 
       <div class="actions">
-        <qty-stepper .qty=${this.qty} @change=${(e: CustomEvent) => (this.qty = e.detail)}></qty-stepper>
-        <button class="primary" @click=${() => this.addToCart(product.name, color.name)}>
-          Add to Bag
-        </button>
         <button
           class="wish-btn ${wished ? 'active' : ''}"
           aria-label="Toggle wishlist"
           @click=${() => wishlistStore.toggle(product.id)}
         >
-          ${wished ? '♥' : '♡'}
+          ${wished ? '♥' : '♡'} ${wished ? 'Saved to Wishlist' : 'Add to Wishlist'}
         </button>
       </div>
 
@@ -238,8 +195,6 @@ export class ProductDetailView extends LitElement {
             <product-grid .products=${related}></product-grid>
           `
         : nothing}
-
-      ${this.toast ? html`<div class="toast">${this.toast}</div>` : nothing}
     `;
   }
 }

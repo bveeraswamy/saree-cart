@@ -1,6 +1,5 @@
 import { LitElement, html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { cartStore } from '../state/cart-store';
 import { wishlistStore } from '../state/wishlist-store';
 import { StoreController } from '../state/store-controller';
 
@@ -15,15 +14,12 @@ const TABS: Tab[] = [
   { id: 'home', path: '#/', label: 'Home', icon: '🏠' },
   { id: 'shop', path: '#/shop', label: 'Shop', icon: '🧵' },
   { id: 'wishlist', path: '#/wishlist', label: 'Wishlist', icon: '♡' },
-  { id: 'cart', path: '#/cart', label: 'Cart', icon: '🛍️' },
 ];
 
 @customElement('bottom-nav')
 export class BottomNav extends LitElement {
   @property() active = 'home';
 
-  // retains a StoreController subscription to re-render on store changes
-  cart = new StoreController(this, cartStore);
   // retains a StoreController subscription to re-render on store changes
   wishlist = new StoreController(this, wishlistStore);
 
@@ -86,8 +82,7 @@ export class BottomNav extends LitElement {
     return html`
       <div class="row">
         ${TABS.map((t) => {
-          const badge =
-            t.id === 'cart' ? cartStore.count : t.id === 'wishlist' ? wishlistStore.count : 0;
+          const badge = t.id === 'wishlist' ? wishlistStore.count : 0;
           return html`
             <button class=${this.active === t.id ? 'active' : ''} @click=${() => this.go(t.path)}>
               ${badge ? html`<span class="count">${badge}</span>` : ''}

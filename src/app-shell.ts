@@ -7,14 +7,12 @@ import './components/bottom-nav';
 import './views/home-view';
 import './views/shop-view';
 import './views/product-detail-view';
-import './views/cart-view';
 import './views/wishlist-view';
 
 type Route =
   | { name: 'home' }
   | { name: 'shop'; category: string }
   | { name: 'product'; id: string }
-  | { name: 'cart' }
   | { name: 'wishlist' };
 
 function parseRoute(hash: string): Route {
@@ -26,8 +24,6 @@ function parseRoute(hash: string): Route {
       return { name: 'shop', category: segs[1] ?? '' };
     case 'product':
       return segs[1] ? { name: 'product', id: segs[1] } : { name: 'home' };
-    case 'cart':
-      return { name: 'cart' };
     case 'wishlist':
       return { name: 'wishlist' };
     default:
@@ -86,8 +82,6 @@ export class AppShell extends LitElement {
       case 'shop':
       case 'product':
         return 'shop';
-      case 'cart':
-        return 'cart';
       case 'wishlist':
         return 'wishlist';
       default:
@@ -106,8 +100,6 @@ export class AppShell extends LitElement {
           showSearch: false,
           label: PRODUCTS.find((p) => p.id === route.id)?.name ?? 'Product',
         };
-      case 'cart':
-        return { showBack: false, showSearch: false, label: 'My Bag' };
       case 'wishlist':
         return { showBack: false, showSearch: false, label: 'Wishlist' };
       default:
@@ -138,8 +130,6 @@ export class AppShell extends LitElement {
         return html`<shop-view .categoryId=${this.route.category} .query=${this.searchQuery}></shop-view>`;
       case 'product':
         return html`<product-detail-view .productId=${this.route.id}></product-detail-view>`;
-      case 'cart':
-        return html`<cart-view></cart-view>`;
       case 'wishlist':
         return html`<wishlist-view></wishlist-view>`;
     }

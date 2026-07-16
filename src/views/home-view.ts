@@ -153,8 +153,9 @@ export class HomeView extends LitElement {
 
       <div class="hero">
         <p class="eyebrow">Festive Edit 2026</p>
-        <h1>Handwoven sarees, curated for every occasion</h1>
-        <button @click=${() => this.go('#/shop')}>Shop the collection</button>
+        <!--<h1>Handwoven sarees, curated for every occasion</h1>-->
+        <h1>Comming soon</h1>
+        <!--<button @click=${() => this.go('#/shop')}>Shop the collection</button>-->
       </div>
 
       <category-chips @select=${(e: CustomEvent) => this.go(`#/shop/${e.detail}`)}></category-chips>
@@ -191,7 +192,15 @@ export class HomeView extends LitElement {
 
       <section>
         <p class="section-title">Trending Now</p>
-        <product-grid .products=${trending}></product-grid>
+        ${trending.length
+          ? html`<product-grid .products=${trending}></product-grid>`
+          : html`
+              <div class="empty">
+                <span class="icon">🥻</span>
+                <p>No sarees available right now.</p>
+                <p>Check back soon for our latest collection.</p>
+              </div>
+            `}
       </section>
     `;
   }

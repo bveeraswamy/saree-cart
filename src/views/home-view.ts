@@ -154,7 +154,7 @@ export class HomeView extends LitElement {
       <div class="hero">
         <p class="eyebrow">Festive Edit 2026</p>
         <!--<h1>Handwoven sarees, curated for every occasion</h1>-->
-        <h1>Comming soon</h1>
+        <h1>Coming soon</h1>
         <!--<button @click=${() => this.go('#/shop')}>Shop the collection</button>-->
       </div>
 

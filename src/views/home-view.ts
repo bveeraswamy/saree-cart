@@ -1,5 +1,5 @@
 import { LitElement, html, css } from 'lit';
-import { customElement } from 'lit/decorators.js';
+import { customElement, state } from 'lit/decorators.js';
 import { PRODUCTS } from '../data/products';
 import { sharedStyles } from '../styles/shared-styles';
 import '../components/category-chips';
@@ -7,9 +7,34 @@ import '../components/product-grid';
 
 @customElement('home-view')
 export class HomeView extends LitElement {
+  @state() private logoLoaded = false;
+
+  private logoObserver?: IntersectionObserver;
+
   static styles = [
     sharedStyles,
     css`
+      .brand-logo {
+        width: 100%;
+        height: auto;
+        display: block;
+        border-radius: var(--radius-sm);
+        margin-bottom: 16px;
+        opacity: 0;
+      }
+      .brand-logo.loaded {
+        animation: logo-in 0.7s ease-out both;
+      }
+      @keyframes logo-in {
+        from {
+          opacity: 0;
+          transform: translateY(-16px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
       .hero {
         border-radius: var(--radius);
         background: linear-gradient(135deg, var(--accent-strong), var(--accent));
@@ -90,12 +115,42 @@ export class HomeView extends LitElement {
     location.hash = hash;
   }
 
+  firstUpdated() {
+    const logo = this.renderRoot.querySelector('.brand-logo');
+    if (!logo) return;
+    this.logoObserver = new IntersectionObserver(
+      ([entry]) => {
+        this.dispatchEvent(
+          new CustomEvent('logo-visible-change', {
+            detail: { visible: entry.isIntersecting },
+            bubbles: true,
+            composed: true,
+          })
+        );
+      },
+      { rootMargin: '-56px 0px 0px 0px', threshold: 0 }
+    );
+    this.logoObserver.observe(logo);
+  }
+
+  disconnectedCallback() {
+    this.logoObserver?.disconnect();
+    super.disconnectedCallback();
+  }
+
   render() {
     const bestsellers = PRODUCTS.filter((p) => p.badge === 'Bestseller').slice(0, 4);
     const newArrivals = PRODUCTS.filter((p) => p.badge === 'New').slice(0, 4);
     const trending = PRODUCTS.slice(0, 8);
 
     return html`
+      <img
+        class="brand-logo ${this.logoLoaded ? 'loaded' : ''}"
+        src="/logo.jpg"
+        alt="RAGA Boutique"
+        @load=${() => (this.logoLoaded = true)}
+      />
+
       <div class="hero">
         <p class="eyebrow">Festive Edit 2026</p>
         <h1>Handwoven sarees, curated for every occasion</h1>

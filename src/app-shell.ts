@@ -40,6 +40,7 @@ function parseRoute(hash: string): Route {
 export class AppShell extends LitElement {
   @state() private route: Route = parseRoute(location.hash);
   @state() private searchQuery = '';
+  @state() private homeLogoVisible = true;
 
   static styles = css`
     :host {
@@ -53,8 +54,17 @@ export class AppShell extends LitElement {
     }
     main {
       flex: 1;
+      display: flex;
+      flex-direction: column;
       padding: 14px 16px 24px;
       min-width: 0;
+    }
+    footer {
+      margin-top: auto;
+      text-align: center;
+      padding: 18px 16px 4px;
+      font-size: 11.5px;
+      color: var(--text-faint);
     }
   `;
 
@@ -71,8 +81,13 @@ export class AppShell extends LitElement {
   private onHashChange = () => {
     const next = parseRoute(location.hash);
     if (next.name !== 'shop') this.searchQuery = '';
+    if (next.name === 'home') this.homeLogoVisible = true;
     this.route = next;
-    this.renderRoot.querySelector('main')?.scrollTo({ top: 0 });
+    window.scrollTo({ top: 0 });
+  };
+
+  private onLogoVisibleChange = (e: CustomEvent<{ visible: boolean }>) => {
+    this.homeLogoVisible = e.detail.visible;
   };
 
   private get activeTab() {
@@ -115,9 +130,13 @@ export class AppShell extends LitElement {
         .showSearch=${tb.showSearch}
         .label=${tb.label}
         .query=${this.searchQuery}
+        .brandVisible=${!this.homeLogoVisible}
         @search=${(e: CustomEvent) => (this.searchQuery = e.detail)}
       ></top-bar>
-      <main>${this.renderRoute()}</main>
+      <main @logo-visible-change=${this.onLogoVisibleChange}>
+        ${this.renderRoute()}
+        <footer>Powered by BAGA Solutions</footer>
+      </main>
       <bottom-nav .active=${this.activeTab}></bottom-nav>
     `;
   }

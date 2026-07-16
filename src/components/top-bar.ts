@@ -7,6 +7,7 @@ export class TopBar extends LitElement {
   @property({ type: Boolean }) showBack = false;
   @property({ type: Boolean }) showSearch = false;
   @property() query = '';
+  @property({ type: Boolean }) brandVisible = true;
 
   static styles = css`
     :host {
@@ -14,15 +15,26 @@ export class TopBar extends LitElement {
       top: 0;
       z-index: 20;
       display: block;
-      background: var(--bg-elevated);
-      border-bottom: 1px solid var(--border);
     }
     .bar {
       height: var(--header-h);
+      opacity: 1;
       display: flex;
       align-items: center;
       gap: 8px;
       padding: 0 8px;
+      background: var(--bg-elevated);
+      border-bottom: 1px solid var(--border);
+      overflow: hidden;
+      transition:
+        height 0.45s ease,
+        opacity 0.4s ease,
+        border-color 0.4s ease;
+    }
+    .bar.collapsed {
+      height: 0;
+      opacity: 0;
+      border-bottom-color: transparent;
     }
     .side {
       width: 36px;
@@ -89,8 +101,10 @@ export class TopBar extends LitElement {
   }
 
   render() {
+    const isBrandSlot = !this.showSearch && !this.label;
+    const collapsed = isBrandSlot && !this.brandVisible;
     return html`
-      <div class="bar">
+      <div class="bar ${collapsed ? 'collapsed' : ''}">
         <div class="side">
           ${this.showBack
             ? html`<button class="icon-btn" @click=${() => history.back()} aria-label="Back">‹</button>`

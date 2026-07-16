@@ -30,6 +30,20 @@ export class ProductDetailView extends LitElement {
         margin: 0 auto;
         display: block;
       }
+      saree-swatch.sold-out {
+        filter: grayscale(0.7) brightness(0.7);
+      }
+      .sold-out-badge {
+        display: inline-block;
+        font: 700 11px var(--sans);
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        padding: 4px 9px;
+        border-radius: 5px;
+        background: rgba(0, 0, 0, 0.75);
+        color: #fff;
+        margin-bottom: 10px;
+      }
       .swatches {
         display: flex;
         gap: 8px;
@@ -141,7 +155,11 @@ export class ProductDetailView extends LitElement {
 
     return html`
       <div class="media">
-        <saree-swatch .hex=${color.hex} .pattern=${product.category}></saree-swatch>
+        <saree-swatch
+          class=${product.soldOut ? 'sold-out' : ''}
+          .hex=${color.hex}
+          .pattern=${product.category}
+        ></saree-swatch>
         ${product.colors.length > 1
           ? html`
               <div class="swatches">
@@ -162,6 +180,7 @@ export class ProductDetailView extends LitElement {
 
       <p class="fabric">${product.fabric}</p>
       <h1>${product.name}</h1>
+      ${product.soldOut ? html`<span class="sold-out-badge">Sold Out</span>` : nothing}
       <rating-stars .rating=${product.rating} .reviews=${product.reviews}></rating-stars>
       <div class="price-row">
         <span class="now">₹${product.price.toLocaleString('en-IN')}</span>

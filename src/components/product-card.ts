@@ -53,6 +53,29 @@ export class ProductCard extends LitElement {
       background: var(--accent);
       color: var(--accent-contrast);
     }
+    .sold-out-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      border-radius: var(--radius);
+      background: rgba(0, 0, 0, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .sold-out-overlay span {
+      font: 800 12.5px var(--sans);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: #fff;
+      border: 1.5px solid rgba(255, 255, 255, 0.85);
+      border-radius: 6px;
+      padding: 6px 14px;
+      opacity: 0.5;
+    }
+    .info.sold-out {
+      opacity: 0.55;
+    }
     .info {
       padding: 8px 2px 0;
     }
@@ -113,7 +136,7 @@ export class ProductCard extends LitElement {
     return html`
       <div @click=${this.go}>
         <div class="media">
-          ${p.badge ? html`<span class="badge-tag">${p.badge}</span>` : ''}
+          ${p.soldOut ? '' : p.badge ? html`<span class="badge-tag">${p.badge}</span>` : ''}
           <button
             class="wish ${active ? 'active' : ''}"
             aria-label="Toggle wishlist"
@@ -122,8 +145,9 @@ export class ProductCard extends LitElement {
             ${active ? '♥' : '♡'}
           </button>
           <saree-swatch .hex=${p.colors[0].hex} .pattern=${p.category}></saree-swatch>
+          ${p.soldOut ? html`<div class="sold-out-overlay"><span>Sold Out</span></div>` : ''}
         </div>
-        <div class="info">
+        <div class="info ${p.soldOut ? 'sold-out' : ''}">
           <p class="fabric">${p.fabric}</p>
           <p class="name">${p.name}</p>
           <rating-stars .rating=${p.rating} .reviews=${p.reviews}></rating-stars>

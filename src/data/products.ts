@@ -17,6 +17,7 @@ export interface Product {
   description: string;
   care: string[];
   blousePieceIncluded: boolean;
+  soldOut?: boolean;
 }
 
 export const PRODUCTS: Product[] = [
@@ -25,7 +26,7 @@ export const PRODUCTS: Product[] = [
     name: 'Kanjivaram Radiance Silk Saree',
     category: 'kanjivaram',
     fabric: 'Pure Mulberry Silk',
-    price: 8499,
+    price: 12000,
     mrp: 12999,
     rating: 4.7,
     reviews: 312,
@@ -56,6 +57,7 @@ export const PRODUCTS: Product[] = [
       'Rich emerald Kanjivaram with intricate gold zari peacock motifs along the border, finished with a woven checked pallu.',
     care: ['Dry clean only', 'Fold along original creases', 'Keep away from moisture'],
     blousePieceIncluded: true,
+    soldOut: true,
   },
   {
     id: 'ban-tissue-gold',
@@ -91,6 +93,7 @@ export const PRODUCTS: Product[] = [
       'A statement Katan silk Banarasi with a dense meenakari border and hand-finished pallu, woven in Varanasi.',
     care: ['Dry clean only', 'Store flat or on a padded hanger'],
     blousePieceIncluded: true,
+    soldOut: true,
   },
   {
     id: 'cot-handloom-ivory',
@@ -239,6 +242,7 @@ export const PRODUCTS: Product[] = [
       'Opulent bridal silk saree with dense zari embroidery, stonework border and a heavily worked pallu.',
     care: ['Dry clean only', 'Professional storage recommended'],
     blousePieceIncluded: true,
+    soldOut: true,
   },
   {
     id: 'wed-gold-drape',
@@ -289,6 +293,7 @@ export const PRODUCTS: Product[] = [
     description: 'Dabu mud-resist printed cotton saree with hand-carved floral blocks and a woven border.',
     care: ['Hand wash cold', 'Dry in shade'],
     blousePieceIncluded: false,
+    soldOut: true,
   },
   {
     id: 'geo-sunset-shibori',

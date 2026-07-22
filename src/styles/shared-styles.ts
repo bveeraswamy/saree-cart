@@ -6,6 +6,11 @@ export const sharedStyles = css`
     color: var(--text);
     font-family: var(--sans);
   }
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
   h1,
   h2,
   h3 {

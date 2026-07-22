@@ -14,6 +14,7 @@ const TABS: Tab[] = [
   { id: 'home', path: '#/', label: 'Home', icon: '🏠' },
   { id: 'shop', path: '#/shop', label: 'Shop', icon: '🧵' },
   { id: 'wishlist', path: '#/wishlist', label: 'Wishlist', icon: '♡' },
+  { id: 'account', path: '#/account', label: 'Account', icon: '👤' },
 ];
 
 @customElement('bottom-nav')

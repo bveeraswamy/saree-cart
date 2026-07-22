@@ -8,12 +8,16 @@ import './views/home-view';
 import './views/shop-view';
 import './views/product-detail-view';
 import './views/wishlist-view';
+import './views/account-view';
+import './views/user-detail-view';
 
 type Route =
   | { name: 'home' }
   | { name: 'shop'; category: string }
   | { name: 'product'; id: string }
-  | { name: 'wishlist' };
+  | { name: 'wishlist' }
+  | { name: 'account' }
+  | { name: 'userDetail'; username: string };
 
 function parseRoute(hash: string): Route {
   const path = hash.replace(/^#/, '');
@@ -26,6 +30,10 @@ function parseRoute(hash: string): Route {
       return segs[1] ? { name: 'product', id: segs[1] } : { name: 'home' };
     case 'wishlist':
       return { name: 'wishlist' };
+    case 'account':
+      return segs[1] === 'users' && segs[2]
+        ? { name: 'userDetail', username: segs[2] }
+        : { name: 'account' };
     default:
       return { name: 'home' };
   }
@@ -99,6 +107,9 @@ export class AppShell extends LitElement {
         return 'shop';
       case 'wishlist':
         return 'wishlist';
+      case 'account':
+      case 'userDetail':
+        return 'account';
       default:
         return '';
     }
@@ -117,6 +128,10 @@ export class AppShell extends LitElement {
         };
       case 'wishlist':
         return { showBack: false, showSearch: false, label: 'Wishlist' };
+      case 'account':
+        return { showBack: false, showSearch: false, label: 'Account' };
+      case 'userDetail':
+        return { showBack: true, showSearch: false, label: route.username };
       default:
         return { showBack: false, showSearch: false, label: '' };
     }
@@ -151,6 +166,10 @@ export class AppShell extends LitElement {
         return html`<product-detail-view .productId=${this.route.id}></product-detail-view>`;
       case 'wishlist':
         return html`<wishlist-view></wishlist-view>`;
+      case 'account':
+        return html`<account-view></account-view>`;
+      case 'userDetail':
+        return html`<user-detail-view .username=${this.route.username}></user-detail-view>`;
     }
   }
 }

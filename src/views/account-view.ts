@@ -2,11 +2,13 @@ import { LitElement, html, css, nothing } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { authStore, type AuthUser } from '../state/auth-store';
 import { StoreController } from '../state/store-controller';
-import { login, register, logout, listUsers, AuthApiError, type AccountSummary } from '../api/auth-api';
+import { login, register, logout, listUsers, deleteUser, AuthApiError, type AccountSummary } from '../api/auth-api';
+import { listProducts, deleteProduct, type InventoryProduct } from '../api/catalog-api';
+import { catalogStore } from '../state/catalog-store';
 import { sharedStyles } from '../styles/shared-styles';
 
 type Mode = 'signin' | 'signup';
-type AdminTab = 'profile' | 'users';
+type AdminTab = 'profile' | 'users' | 'inventory';
 
 @customElement('account-view')
 export class AccountView extends LitElement {
@@ -22,6 +24,12 @@ export class AccountView extends LitElement {
   @state() private usersLoading = false;
   @state() private usersError = '';
   @state() private usersLoaded = false;
+
+  @state() private products: InventoryProduct[] = [];
+  @state() private productsLoading = false;
+  @state() private productsError = '';
+  @state() private productsLoaded = false;
+  @state() private productCodeFilter = '';
 
   // retains a StoreController subscription to re-render on store changes
   auth = new StoreController(this, authStore);
@@ -162,6 +170,73 @@ export class AccountView extends LitElement {
         text-overflow: ellipsis;
         white-space: nowrap;
       }
+      .product-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--border);
+        cursor: pointer;
+      }
+      .product-row:last-child {
+        border-bottom: none;
+      }
+      .product-row .meta {
+        flex: 1;
+        min-width: 0;
+      }
+      .product-row .name {
+        font: 700 13.5px var(--sans);
+        color: var(--text);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .product-row .sub {
+        font-size: 11.5px;
+        color: var(--text-faint);
+      }
+      .product-row .price {
+        font: 700 13px var(--sans);
+        color: var(--text);
+        flex: none;
+      }
+      button.remove {
+        flex: none;
+        background: none;
+        border: none;
+        color: var(--bad);
+        font-size: 18px;
+        line-height: 1;
+        cursor: pointer;
+        padding: 4px;
+      }
+      .empty-note {
+        font-size: 12.5px;
+        color: var(--text-faint);
+        text-align: center;
+        padding: 10px 0 18px;
+      }
+      .with-fab {
+        padding-bottom: 76px;
+      }
+      .fab-add {
+        position: fixed;
+        left: 50%;
+        transform: translateX(-50%);
+        bottom: calc(var(--nav-h) + var(--safe-b) + 14px);
+        width: calc(100% - 32px);
+        max-width: 528px;
+        height: 48px;
+        border-radius: var(--radius-sm);
+        border: none;
+        background: var(--accent);
+        color: var(--accent-contrast);
+        font: 700 14px var(--sans);
+        cursor: pointer;
+        z-index: 15;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+      }
     `,
   ];
 
@@ -215,6 +290,56 @@ export class AccountView extends LitElement {
     }
   }
 
+  private async openInventoryTab() {
+    this.adminTab = 'inventory';
+    if (this.productsLoaded || this.productsLoading) return;
+    await this.refreshProducts();
+  }
+
+  private async refreshProducts() {
+    const user = authStore.user;
+    if (!user) return;
+    this.productsLoading = true;
+    this.productsError = '';
+    try {
+      this.products = await listProducts(user.token);
+      this.productsLoaded = true;
+    } catch (err) {
+      this.productsError = err instanceof AuthApiError ? err.message : 'Could not reach the server.';
+    } finally {
+      this.productsLoading = false;
+    }
+  }
+
+  private async onDeleteProduct(id: number) {
+    const user = authStore.user;
+    if (!user) return;
+    const previous = this.products;
+    this.products = this.products.filter((p) => p.id !== id);
+    try {
+      await deleteProduct(user.token, id);
+      catalogStore.refresh();
+    } catch (err) {
+      this.products = previous;
+      this.productsError = err instanceof AuthApiError ? err.message : 'Could not reach the server.';
+    }
+  }
+
+  private async onDeleteUser(username: string) {
+    const admin = authStore.user;
+    if (!admin || admin.username === username) return;
+    if (!confirm(`Remove ${username}? This cannot be undone.`)) return;
+
+    const previous = this.users;
+    this.users = this.users.filter((u) => u.username !== username);
+    try {
+      await deleteUser(admin.token, username);
+    } catch (err) {
+      this.users = previous;
+      this.usersError = err instanceof AuthApiError ? err.message : 'Could not reach the server.';
+    }
+  }
+
   private renderProfileCard(user: AuthUser) {
     return html`
       <div class="card">
@@ -237,6 +362,7 @@ export class AccountView extends LitElement {
     if (this.usersError) {
       return html`<div class="card"><p class="error">${this.usersError}</p></div>`;
     }
+    const self = authStore.user?.username;
     return html`
       <div class="card">
         ${this.users.map(
@@ -248,9 +374,77 @@ export class AccountView extends LitElement {
                 <div class="email">${u.email || 'No email'}</div>
               </div>
               <span class="badge">${u.role}</span>
+              ${u.username !== self
+                ? html`
+                    <button
+                      class="remove"
+                      aria-label="Remove ${u.username}"
+                      @click=${(e: Event) => {
+                        e.stopPropagation();
+                        this.onDeleteUser(u.username);
+                      }}
+                    >
+                      ✕
+                    </button>
+                  `
+                : nothing}
             </div>
           `
         )}
+      </div>
+    `;
+  }
+
+  private get filteredProducts() {
+    const q = this.productCodeFilter.trim().toLowerCase();
+    if (!q) return this.products;
+    return this.products.filter((p) => (p.productCode ?? '').toLowerCase().includes(q));
+  }
+
+  private renderInventoryTab() {
+    const filtered = this.filteredProducts;
+    return html`
+      <div class="card">
+        <div class="field">
+          <input
+            .value=${this.productCodeFilter}
+            @input=${(e: Event) => (this.productCodeFilter = (e.target as HTMLInputElement).value)}
+            placeholder="Filter by product code"
+          />
+        </div>
+        ${this.productsLoading
+          ? html`<p>Loading products…</p>`
+          : filtered.length
+            ? filtered.map(
+                (p) => html`
+                  <div
+                    class="product-row"
+                    @click=${() => (location.hash = `#/account/inventory/${p.id}`)}
+                  >
+                    <div class="meta">
+                      <div class="name">${p.name}</div>
+                      <div class="sub">${p.productCode ? `${p.productCode} · ` : ''}${p.category} · ${p.fabric}</div>
+                    </div>
+                    <span class="price">₹${Number(p.price).toLocaleString('en-IN')}</span>
+                    <button
+                      class="remove"
+                      aria-label="Remove ${p.name}"
+                      @click=${(e: Event) => {
+                        e.stopPropagation();
+                        this.onDeleteProduct(p.id);
+                      }}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                `
+              )
+            : html`
+                <p class="empty-note">
+                  ${this.products.length ? 'No products match that code.' : 'No products in inventory yet.'}
+                </p>
+              `}
+        ${this.productsError ? html`<p class="error">${this.productsError}</p>` : nothing}
       </div>
     `;
   }
@@ -260,8 +454,19 @@ export class AccountView extends LitElement {
 
     if (user) {
       const isAdmin = user.role === 'Site Admin';
+      const isPowerUser = user.role === 'Power User';
+      const showTabs = isAdmin || isPowerUser;
+
+      const showInventory = showTabs && this.adminTab === 'inventory';
+      let content = this.renderProfileCard(user);
+      if (showInventory) {
+        content = this.renderInventoryTab();
+      } else if (isAdmin && this.adminTab === 'users') {
+        content = this.renderUsersTab();
+      }
+
       return html`
-        ${isAdmin
+        ${showTabs
           ? html`
               <div class="tabs">
                 <button
@@ -270,13 +475,33 @@ export class AccountView extends LitElement {
                 >
                   Profile
                 </button>
-                <button class=${this.adminTab === 'users' ? 'active' : ''} @click=${() => this.openUsersTab()}>
-                  Users
+                ${isAdmin
+                  ? html`
+                      <button
+                        class=${this.adminTab === 'users' ? 'active' : ''}
+                        @click=${() => this.openUsersTab()}
+                      >
+                        Users
+                      </button>
+                    `
+                  : nothing}
+                <button
+                  class=${this.adminTab === 'inventory' ? 'active' : ''}
+                  @click=${() => this.openInventoryTab()}
+                >
+                  Inventory
                 </button>
               </div>
             `
           : nothing}
-        ${isAdmin && this.adminTab === 'users' ? this.renderUsersTab() : this.renderProfileCard(user)}
+        <div class=${showInventory ? 'with-fab' : ''}>${content}</div>
+        ${showInventory
+          ? html`
+              <button class="fab-add" @click=${() => (location.hash = '#/account/inventory/new')}>
+                + Add Product
+              </button>
+            `
+          : nothing}
       `;
     }
 

@@ -1,7 +1,7 @@
 import { LitElement, html, css, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { authStore } from '../state/auth-store';
-import { getUser, updateUserRole, AuthApiError, type AccountSummary } from '../api/auth-api';
+import { getUser, updateUserRole, deleteUser, AuthApiError, type AccountSummary } from '../api/auth-api';
 import { sharedStyles } from '../styles/shared-styles';
 
 @customElement('user-detail-view')
@@ -12,6 +12,7 @@ export class UserDetailView extends LitElement {
   @state() private loading = true;
   @state() private error = '';
   @state() private saving = false;
+  @state() private removing = false;
 
   static styles = [
     sharedStyles,
@@ -101,6 +102,25 @@ export class UserDetailView extends LitElement {
         padding: 60px 20px;
         color: var(--text-faint);
       }
+      .danger-zone {
+        margin-top: 20px;
+        padding-top: 16px;
+        border-top: 1px solid var(--border);
+      }
+      button.danger {
+        width: 100%;
+        background: none;
+        border: 1px solid var(--bad);
+        color: var(--bad);
+        border-radius: var(--radius-sm);
+        padding: 11px 12px;
+        font: 700 14px var(--sans);
+        cursor: pointer;
+      }
+      button.danger:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
     `,
   ];
 
@@ -121,6 +141,24 @@ export class UserDetailView extends LitElement {
       this.error = err instanceof AuthApiError ? err.message : 'Could not reach the server.';
     } finally {
       this.loading = false;
+    }
+  }
+
+  private async onRemove() {
+    const admin = authStore.user;
+    if (!admin || !this.account || this.removing || this.saving) return;
+    if (admin.username === this.account.username) return;
+    if (!confirm(`Remove ${this.account.username}? This cannot be undone.`)) return;
+
+    this.removing = true;
+    this.error = '';
+    try {
+      await deleteUser(admin.token, this.account.username);
+      location.hash = '#/account';
+    } catch (err) {
+      this.error = err instanceof AuthApiError ? err.message : 'Could not reach the server.';
+    } finally {
+      this.removing = false;
     }
   }
 
@@ -155,6 +193,7 @@ export class UserDetailView extends LitElement {
 
     const a = this.account;
     const isSiteAdmin = a.role === 'Site Admin';
+    const isSelf = admin.username === a.username;
     const joined = new Date(a.dateJoined).toLocaleDateString('en-IN', {
       year: 'numeric',
       month: 'short',
@@ -188,6 +227,13 @@ export class UserDetailView extends LitElement {
           ? html`<p class="checkbox-hint">Site Admins already have full access.</p>`
           : nothing}
         ${this.error ? html`<p class="checkbox-hint" style="color:var(--bad)">${this.error}</p>` : nothing}
+
+        <div class="danger-zone">
+          <button class="danger" ?disabled=${isSelf || this.removing} @click=${this.onRemove}>
+            ${this.removing ? 'Removing…' : 'Remove User'}
+          </button>
+          ${isSelf ? html`<p class="checkbox-hint">You cannot remove your own account.</p>` : nothing}
+        </div>
       </div>
     `;
   }

@@ -1,6 +1,5 @@
 import type { AuthUser } from '../state/auth-store';
-
-const API_BASE = 'http://127.0.0.1:8000';
+import { API_BASE } from './config';
 
 export class AuthApiError extends Error {}
 
@@ -66,6 +65,17 @@ export async function getUser(token: string, username: string): Promise<AccountS
     throw new AuthApiError(body.detail ?? 'Could not load this user.');
   }
   return body as AccountSummary;
+}
+
+export async function deleteUser(token: string, username: string): Promise<void> {
+  const res = await fetch(`${API_BASE}/api/auth/users/${encodeURIComponent(username)}/`, {
+    method: 'DELETE',
+    headers: { Authorization: `Token ${token}` },
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new AuthApiError(body.detail ?? 'Could not remove this user.');
+  }
 }
 
 export async function updateUserRole(

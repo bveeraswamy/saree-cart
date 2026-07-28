@@ -1,10 +1,11 @@
 import { LitElement, html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { CATEGORIES } from '../data/categories';
+import type { CategoryOption } from '../state/catalog-store';
 
 @customElement('category-chips')
 export class CategoryChips extends LitElement {
   @property() active = '';
+  @property({ attribute: false }) categories: CategoryOption[] = [];
 
   static styles = css`
     :host {
@@ -51,10 +52,10 @@ export class CategoryChips extends LitElement {
         <button class=${this.active === '' ? 'active' : ''} @click=${() => this.select('')}>
           All
         </button>
-        ${CATEGORIES.map(
+        ${this.categories.map(
           (c) => html`
             <button class=${this.active === c.id ? 'active' : ''} @click=${() => this.select(c.id)}>
-              <span>${c.icon}</span>${c.label}
+              ${c.label}
             </button>
           `
         )}

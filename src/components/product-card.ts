@@ -42,10 +42,10 @@ export class ProductCard extends LitElement {
     .product-image {
       display: block;
       position: absolute;
-      top: 15%;
-      left: 15%;
-      width: 70%;
-      height: 70%;
+      top: 3%;
+      left: 5%;
+      width: 89%;
+      height: 100%;
       object-fit: cover;
       border-radius: var(--radius-sm);
       background: var(--bg-sunken);
@@ -53,10 +53,10 @@ export class ProductCard extends LitElement {
     .photo-shade,
     .photo-sheen {
       position: absolute;
-      top: 15%;
-      left: 15%;
-      width: 70%;
-      height: 70%;
+      top: 3%;
+      left: 5%;
+      width: 89%;
+      height: 100%;
       border-radius: var(--radius-sm);
       pointer-events: none;
     }

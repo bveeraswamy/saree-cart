@@ -1,6 +1,6 @@
 import { LitElement, html, css } from 'lit';
 import { customElement } from 'lit/decorators.js';
-import { PRODUCTS } from '../data/products';
+import { catalogStore } from '../state/catalog-store';
 import { wishlistStore } from '../state/wishlist-store';
 import { StoreController } from '../state/store-controller';
 import { sharedStyles } from '../styles/shared-styles';
@@ -10,11 +10,18 @@ import '../components/product-grid';
 export class WishlistView extends LitElement {
   // retains a StoreController subscription to re-render on store changes
   wishlist = new StoreController(this, wishlistStore);
+  // retains a StoreController subscription to re-render on store changes
+  catalog = new StoreController(this, catalogStore);
 
   static styles = [sharedStyles, css``];
 
+  connectedCallback() {
+    super.connectedCallback();
+    catalogStore.load();
+  }
+
   render() {
-    const items = PRODUCTS.filter((p) => wishlistStore.has(p.id));
+    const items = catalogStore.products.filter((p) => wishlistStore.has(p.id));
     if (!items.length) {
       return html`
         <div class="empty">

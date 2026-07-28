@@ -1,6 +1,7 @@
 import { LitElement, html, css } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
-import { PRODUCTS } from '../data/products';
+import { catalogStore } from '../state/catalog-store';
+import { StoreController } from '../state/store-controller';
 import { sharedStyles } from '../styles/shared-styles';
 import '../components/category-chips';
 import '../components/product-grid';
@@ -10,6 +11,9 @@ export class HomeView extends LitElement {
   @state() private logoLoaded = false;
 
   private logoObserver?: IntersectionObserver;
+
+  // retains a StoreController subscription to re-render on store changes
+  catalog = new StoreController(this, catalogStore);
 
   static styles = [
     sharedStyles,
@@ -79,6 +83,12 @@ export class HomeView extends LitElement {
       section {
         margin-bottom: 26px;
       }
+      .empty-note {
+        font-size: 13px;
+        color: var(--text-faint);
+        text-align: center;
+        padding: 20px 0;
+      }
       .promo {
         border-radius: var(--radius);
         background: var(--gold-soft);
@@ -115,6 +125,11 @@ export class HomeView extends LitElement {
     location.hash = hash;
   }
 
+  connectedCallback() {
+    super.connectedCallback();
+    catalogStore.load();
+  }
+
   firstUpdated() {
     const logo = this.renderRoot.querySelector('.brand-logo');
     if (!logo) return;
@@ -139,9 +154,10 @@ export class HomeView extends LitElement {
   }
 
   render() {
-    const bestsellers = PRODUCTS.filter((p) => p.badge === 'Bestseller').slice(0, 4);
-    const newArrivals = PRODUCTS.filter((p) => p.badge === 'New').slice(0, 4);
-    const trending = PRODUCTS.slice(0, 8);
+    const products = catalogStore.products;
+    const bestsellers = products.filter((p) => p.badge === 'Bestseller').slice(0, 4);
+    const newArrivals = products.filter((p) => p.badge === 'New').slice(0, 4);
+    const trending = products.slice(0, 8);
 
     return html`
       <img
@@ -158,7 +174,10 @@ export class HomeView extends LitElement {
         <!--<button @click=${() => this.go('#/shop')}>Shop the collection</button>-->
       </div>
 
-      <category-chips @select=${(e: CustomEvent) => this.go(`#/shop/${e.detail}`)}></category-chips>
+      <category-chips
+        .categories=${catalogStore.categories}
+        @select=${(e: CustomEvent) => this.go(`#/shop/${encodeURIComponent(e.detail)}`)}
+      ></category-chips>
 
       ${bestsellers.length
         ? html`
@@ -192,15 +211,17 @@ export class HomeView extends LitElement {
 
       <section>
         <p class="section-title">Trending Now</p>
-        ${trending.length
-          ? html`<product-grid .products=${trending}></product-grid>`
-          : html`
-              <div class="empty">
-                <span class="icon">🥻</span>
-                <p>No sarees available right now.</p>
-                <p>Check back soon for our latest collection.</p>
-              </div>
-            `}
+        ${catalogStore.loading
+          ? html`<p class="empty-note">Loading sarees…</p>`
+          : trending.length
+            ? html`<product-grid .products=${trending}></product-grid>`
+            : html`
+                <div class="empty">
+                  <span class="icon">🥻</span>
+                  <p>No sarees available right now.</p>
+                  <p>Check back soon for our latest collection.</p>
+                </div>
+              `}
       </section>
     `;
   }

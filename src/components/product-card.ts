@@ -1,8 +1,10 @@
-import { LitElement, html, css } from 'lit';
+import { LitElement, html, css, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import type { Product } from '../data/products';
 import { wishlistStore } from '../state/wishlist-store';
 import { StoreController } from '../state/store-controller';
+import { hexToRgb, mixWithWhite } from '../utils/color';
+import { patternForSeed } from './saree-swatch';
 import './saree-swatch';
 import './rating-stars';
 
@@ -16,10 +18,79 @@ export class ProductCard extends LitElement {
   static styles = css`
     :host {
       display: block;
+      height: 100%;
       cursor: pointer;
+    }
+    .card {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
     }
     .media {
       position: relative;
+      width: 100%;
+      aspect-ratio: 3 / 4;
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: var(--bg-sunken);
+    }
+    saree-swatch {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+    .product-image {
+      display: block;
+      position: absolute;
+      top: 15%;
+      left: 15%;
+      width: 70%;
+      height: 70%;
+      object-fit: cover;
+      border-radius: var(--radius-sm);
+      background: var(--bg-sunken);
+    }
+    .photo-shade,
+    .photo-sheen {
+      position: absolute;
+      top: 15%;
+      left: 15%;
+      width: 70%;
+      height: 70%;
+      border-radius: var(--radius-sm);
+      pointer-events: none;
+    }
+    .photo-shade {
+      background: linear-gradient(165deg, rgba(var(--sheen-rgb, 255, 255, 255), 0.22), rgba(0, 0, 0, 0.22) 85%);
+    }
+    .photo-sheen {
+      background: linear-gradient(
+        115deg,
+        transparent 25%,
+        rgba(var(--sheen-rgb, 255, 255, 255), 0.28) 45%,
+        transparent 65%
+      );
+      mix-blend-mode: soft-light;
+    }
+    .pallu-bar {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 18%;
+      border-radius: 0 0 var(--radius) var(--radius);
+      background: linear-gradient(90deg, rgba(183, 134, 47, 0.9), rgba(212, 175, 90, 0.95));
+      border-top: 2px solid rgba(255, 255, 255, 0.35);
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .pallu-label {
+      font: 700 10.5px var(--sans);
+      letter-spacing: 0.04em;
+      color: rgba(0, 0, 0, 0.72);
+      text-shadow: 0 1px 0 rgba(255, 255, 255, 0.25);
     }
     .wish {
       position: absolute;
@@ -78,6 +149,9 @@ export class ProductCard extends LitElement {
     }
     .info {
       padding: 8px 2px 0;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
     }
     .fabric {
       font-size: 11px;
@@ -118,6 +192,22 @@ export class ProductCard extends LitElement {
       font-weight: 700;
       color: var(--good);
     }
+    .buy-now {
+      width: 100%;
+      margin-top: auto;
+      font: 700 12.5px var(--sans);
+      background: var(--accent);
+      color: var(--accent-contrast);
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 9px 0;
+      cursor: pointer;
+    }
+    .buy-now:disabled {
+      background: var(--bg-sunken);
+      color: var(--text-faint);
+      cursor: not-allowed;
+    }
   `;
 
   private toggleWishlist(e: Event) {
@@ -129,13 +219,20 @@ export class ProductCard extends LitElement {
     location.hash = `#/product/${this.product.id}`;
   }
 
+  private buyNow(e: Event) {
+    e.stopPropagation();
+    location.hash = `#/checkout/${this.product.id}`;
+  }
+
   render() {
     const p = this.product;
-    const off = Math.round(((p.mrp - p.price) / p.mrp) * 100);
+    const off = p.mrp ? Math.round(((p.mrp - p.price) / p.mrp) * 100) : null;
     const active = wishlistStore.has(p.id);
+    const sheenRgb = mixWithWhite(hexToRgb(p.containerColor), 0.65);
+    const pattern = patternForSeed(p.id);
     return html`
-      <div @click=${this.go}>
-        <div class="media">
+      <div class="card" @click=${this.go}>
+        <div class="media" style="background:${p.containerColor}">
           ${p.soldOut ? '' : p.badge ? html`<span class="badge-tag">${p.badge}</span>` : ''}
           <button
             class="wish ${active ? 'active' : ''}"
@@ -144,18 +241,47 @@ export class ProductCard extends LitElement {
           >
             ${active ? '♥' : '♡'}
           </button>
-          <saree-swatch .hex=${p.colors[0].hex} .pattern=${p.category}></saree-swatch>
+          ${p.image
+            ? html`
+                <saree-swatch
+                  .hex=${p.containerColor}
+                  .pattern=${pattern}
+                  hidePallu
+                ></saree-swatch>
+                <img class="product-image" src=${p.image} alt=${p.name} />
+                <div class="photo-shade" style="--sheen-rgb:${sheenRgb}"></div>
+                <div class="photo-sheen" style="--sheen-rgb:${sheenRgb}"></div>
+                <div class="pallu-bar">
+                  ${p.productCode ? html`<span class="pallu-label">${p.productCode}</span>` : nothing}
+                </div>
+              `
+            : html`
+                <saree-swatch
+                  .hex=${p.containerColor}
+                  .pattern=${pattern}
+                  .label=${p.productCode ?? ''}
+                ></saree-swatch>
+              `}
           ${p.soldOut ? html`<div class="sold-out-overlay"><span>Sold Out</span></div>` : ''}
         </div>
         <div class="info ${p.soldOut ? 'sold-out' : ''}">
           <p class="fabric">${p.fabric}</p>
           <p class="name">${p.name}</p>
-          <rating-stars .rating=${p.rating} .reviews=${p.reviews}></rating-stars>
+          ${p.rating || p.reviews
+            ? html`<rating-stars .rating=${p.rating} .reviews=${p.reviews}></rating-stars>`
+            : nothing}
           <div class="price-row">
             <span class="now">₹${p.price.toLocaleString('en-IN')}</span>
-            <span class="mrp">₹${p.mrp.toLocaleString('en-IN')}</span>
-            <span class="off">${off}% off</span>
+            ${p.mrp
+              ? html`
+                  <span class="mrp">₹${p.mrp.toLocaleString('en-IN')}</span>
+                  <span class="off">${off}% off</span>
+                `
+              : nothing}
           </div>
+          <button class="buy-now" ?disabled=${p.soldOut} @click=${this.buyNow}>
+            ${p.soldOut ? 'Sold Out' : 'Buy Now'}
+          </button>
         </div>
       </div>
     `;

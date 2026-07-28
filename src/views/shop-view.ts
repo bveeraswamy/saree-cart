@@ -1,7 +1,7 @@
 import { LitElement, html, css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import { PRODUCTS } from '../data/products';
-import { categoryLabel } from '../data/categories';
+import { catalogStore } from '../state/catalog-store';
+import { StoreController } from '../state/store-controller';
 import { sharedStyles } from '../styles/shared-styles';
 import '../components/category-chips';
 import '../components/product-grid';
@@ -14,6 +14,14 @@ export class ShopView extends LitElement {
   @property() query = '';
 
   @state() private sort: Sort = 'popularity';
+
+  // retains a StoreController subscription to re-render on store changes
+  catalog = new StoreController(this, catalogStore);
+
+  connectedCallback() {
+    super.connectedCallback();
+    catalogStore.load();
+  }
 
   static styles = [
     sharedStyles,
@@ -47,13 +55,13 @@ export class ShopView extends LitElement {
   ];
 
   private setCategory(id: string) {
-    location.hash = id ? `#/shop/${id}` : '#/shop';
+    location.hash = id ? `#/shop/${encodeURIComponent(id)}` : '#/shop';
   }
 
   private get filtered() {
-    let list = PRODUCTS;
+    let list = catalogStore.products;
     if (this.categoryId) {
-      list = list.filter((p) => p.category === this.categoryId);
+      list = list.filter((p) => p.category.toLowerCase() === this.categoryId.toLowerCase());
     }
     if (this.query.trim()) {
       const q = this.query.trim().toLowerCase();
@@ -86,7 +94,7 @@ export class ShopView extends LitElement {
     const heading = this.query
       ? `Results for "${this.query}"`
       : this.categoryId
-        ? categoryLabel(this.categoryId)
+        ? catalogStore.categoryLabel(this.categoryId)
         : 'All Sarees';
 
     return html`
@@ -97,6 +105,7 @@ export class ShopView extends LitElement {
 
       <category-chips
         .active=${this.categoryId}
+        .categories=${catalogStore.categories}
         @select=${(e: CustomEvent) => this.setCategory(e.detail)}
       ></category-chips>
 
@@ -112,15 +121,17 @@ export class ShopView extends LitElement {
         </select>
       </div>
 
-      ${results.length
-        ? html`<product-grid .products=${results}></product-grid>`
-        : html`
-            <div class="empty">
-              <span class="icon">🥻</span>
-              <p>No sarees match your search.</p>
-              <button class="ghost" @click=${() => this.setCategory('')}>Clear filters</button>
-            </div>
-          `}
+      ${catalogStore.loading
+        ? html`<p class="count">Loading sarees…</p>`
+        : results.length
+          ? html`<product-grid .products=${results}></product-grid>`
+          : html`
+              <div class="empty">
+                <span class="icon">🥻</span>
+                <p>No sarees match your search.</p>
+                <button class="ghost" @click=${() => this.setCategory('')}>Clear filters</button>
+              </div>
+            `}
     `;
   }
 }

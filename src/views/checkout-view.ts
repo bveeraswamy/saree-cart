@@ -1,4 +1,4 @@
-import { LitElement, html, css } from 'lit';
+import { LitElement, html, css, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { catalogStore } from '../state/catalog-store';
 import { StoreController } from '../state/store-controller';
@@ -131,12 +131,14 @@ export class CheckoutView extends LitElement {
             : html`<saree-swatch .hex=${product.containerColor} .pattern=${product.category}></saree-swatch>`}
           <div class="info">
             <p class="name">${product.name}</p>
-            <p class="sub">${product.fabric}</p>
+            <p class="sub">${product.productCode ? `${product.productCode} · ` : ''}${product.fabric}</p>
             <p class="price">₹${product.price.toLocaleString('en-IN')}</p>
           </div>
         </div>
         <div class="row"><span>Item total</span><span>₹${product.price.toLocaleString('en-IN')}</span></div>
-        <div class="row"><span>Delivery</span><span>Free</span></div>
+        ${product.deliveryAvailable
+          ? html`<div class="row"><span>Delivery</span><span>Free</span></div>`
+          : nothing}
         <div class="row total">
           <span>Total</span><span>₹${product.price.toLocaleString('en-IN')}</span>
         </div>

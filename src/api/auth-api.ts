@@ -94,3 +94,27 @@ export async function updateUserRole(
   }
   return body as AccountSummary;
 }
+
+export async function syncProdData(token: string): Promise<{ ok: boolean; output: string }> {
+  const res = await fetch(`${API_BASE}/api/auth/sync-prod-data/`, {
+    method: 'POST',
+    headers: { Authorization: `Token ${token}` },
+  });
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new AuthApiError(body.detail ?? 'Could not sync local data.');
+  }
+  return body as { ok: boolean; output: string };
+}
+
+export async function exportCatalogJson(token: string): Promise<{ ok: boolean; count: number; path: string }> {
+  const res = await fetch(`${API_BASE}/api/auth/export-catalog-json/`, {
+    method: 'POST',
+    headers: { Authorization: `Token ${token}` },
+  });
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new AuthApiError(body.detail ?? 'Could not export catalog JSON.');
+  }
+  return body as { ok: boolean; count: number; path: string };
+}

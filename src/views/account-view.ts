@@ -2,7 +2,17 @@ import { LitElement, html, css, nothing } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { authStore, type AuthUser } from '../state/auth-store';
 import { StoreController } from '../state/store-controller';
-import { login, register, logout, listUsers, deleteUser, AuthApiError, type AccountSummary } from '../api/auth-api';
+import {
+  login,
+  register,
+  logout,
+  listUsers,
+  deleteUser,
+  syncProdData,
+  exportCatalogJson,
+  AuthApiError,
+  type AccountSummary,
+} from '../api/auth-api';
 import { listProducts, deleteProduct, type InventoryProduct } from '../api/catalog-api';
 import { catalogStore } from '../state/catalog-store';
 import { sharedStyles } from '../styles/shared-styles';
@@ -30,6 +40,12 @@ export class AccountView extends LitElement {
   @state() private productsError = '';
   @state() private productsLoaded = false;
   @state() private productCodeFilter = '';
+
+  @state() private syncing = false;
+  @state() private syncMessage = '';
+
+  @state() private exporting = false;
+  @state() private exportMessage = '';
 
   // retains a StoreController subscription to re-render on store changes
   auth = new StoreController(this, authStore);
@@ -132,6 +148,15 @@ export class AccountView extends LitElement {
       }
       button.ghost {
         width: 100%;
+      }
+      button.sync-btn {
+        margin-top: 10px;
+      }
+      .sync-note {
+        font-size: 11.5px;
+        color: var(--text-faint);
+        text-align: center;
+        margin: 8px 0 0;
       }
       .hint {
         font-size: 11.5px;
@@ -340,7 +365,49 @@ export class AccountView extends LitElement {
     }
   }
 
+  private isLocalDev() {
+    return location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+  }
+
+  private async onSyncProdData() {
+    const admin = authStore.user;
+    if (!admin || this.syncing) return;
+    const ok = confirm(
+      'This overwrites your local database and product images with a copy of production (your ' +
+        'local data is backed up first). Continue?'
+    );
+    if (!ok) return;
+    this.syncing = true;
+    this.syncMessage = '';
+    try {
+      const result = await syncProdData(admin.token);
+      this.syncMessage = result.ok
+        ? 'Synced. Restart your local server to pick up the new data.'
+        : result.output || 'Sync failed.';
+    } catch (err) {
+      this.syncMessage = err instanceof AuthApiError ? err.message : 'Could not reach the server.';
+    } finally {
+      this.syncing = false;
+    }
+  }
+
+  private async onExportCatalogJson() {
+    const admin = authStore.user;
+    if (!admin || this.exporting) return;
+    this.exporting = true;
+    this.exportMessage = '';
+    try {
+      const result = await exportCatalogJson(admin.token);
+      this.exportMessage = `Exported ${result.count} products. Commit and push saree-ecart/public/catalog-fallback.json to publish the fallback.`;
+    } catch (err) {
+      this.exportMessage = err instanceof AuthApiError ? err.message : 'Could not reach the server.';
+    } finally {
+      this.exporting = false;
+    }
+  }
+
   private renderProfileCard(user: AuthUser) {
+    const isAdmin = user.role === 'Site Admin';
     return html`
       <div class="card">
         <div class="who">
@@ -351,6 +418,18 @@ export class AccountView extends LitElement {
           </div>
         </div>
         <button class="ghost" @click=${this.onLogout}>Log Out</button>
+        ${isAdmin && this.isLocalDev()
+          ? html`
+              <button class="ghost sync-btn" ?disabled=${this.syncing} @click=${this.onSyncProdData}>
+                ${this.syncing ? 'Syncing…' : 'Sync Local with Prod'}
+              </button>
+              ${this.syncMessage ? html`<p class="sync-note">${this.syncMessage}</p>` : nothing}
+              <button class="ghost sync-btn" ?disabled=${this.exporting} @click=${this.onExportCatalogJson}>
+                ${this.exporting ? 'Exporting…' : 'Export Catalog JSON (Fallback)'}
+              </button>
+              ${this.exportMessage ? html`<p class="sync-note">${this.exportMessage}</p>` : nothing}
+            `
+          : nothing}
       </div>
     `;
   }
@@ -419,7 +498,8 @@ export class AccountView extends LitElement {
                 (p) => html`
                   <div
                     class="product-row"
-                    @click=${() => (location.hash = `#/account/inventory/${p.id}`)}
+                    @click=${() =>
+                      (location.hash = `#/account/inventory/${encodeURIComponent(p.productCode || String(p.id))}`)}
                   >
                     <div class="meta">
                       <div class="name">${p.name}</div>

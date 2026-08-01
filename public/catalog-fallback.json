@@ -1,0 +1,290 @@
+[
+  {
+    "id": 1,
+    "productCode": "VKSS-01",
+    "name": "Vintage Kanchi Semi Silk",
+    "category": "Kanjivaram",
+    "fabric": "Semi silk",
+    "price": "2600.00",
+    "mrp": "3200.00",
+    "description": "This traditional olive-green silk saree features golden zari mango motifs dotted across the body. It is framed by a rich, broad red-and-gold zari border woven with intricate floral and geometric patterns.",
+    "rating": "0.0",
+    "reviews": 0,
+    "badge": "New",
+    "blousePieceIncluded": true,
+    "soldOut": false,
+    "isListed": true,
+    "hexColor": "#ffffff",
+    "productColor": "olive green",
+    "care": [
+      "Dry clean only"
+    ],
+    "image": "https://balasaravanan.pythonanywhere.com/media/products/gallery/IMG_9186.png",
+    "gallery": [
+      {
+        "id": 8,
+        "url": "https://balasaravanan.pythonanywhere.com/media/products/gallery/83f0ffed-97a0-4a8e-8044-0e8e63beeec8_imcXwGx.jpeg"
+      },
+      {
+        "id": 9,
+        "url": "https://balasaravanan.pythonanywhere.com/media/products/gallery/925f2d84-4e1c-43d5-bd36-7a2184e024f6_lZl9HHc.jpeg"
+      }
+    ],
+    "createdAt": "2026-07-28T17:06:08.275189+00:00"
+  },
+  {
+    "id": 2,
+    "productCode": "BKS-02",
+    "name": "Banarasi Kanchi Silk",
+    "category": "Kanjivaram",
+    "fabric": "Banarasi",
+    "price": "2900.00",
+    "mrp": "3400.00",
+    "description": "This vibrant lime-green silk saree features intricate silver and gold floral jaal weaving across the entire body. It is framed by a rich golden zari border and a heavily detailed pallu, paired with a matching short-sleeved blouse.",
+    "rating": "4.5",
+    "reviews": 0,
+    "badge": "New",
+    "blousePieceIncluded": true,
+    "soldOut": false,
+    "isListed": true,
+    "hexColor": "#311100",
+    "productColor": "lime green",
+    "care": [
+      "Dry cleaning only"
+    ],
+    "image": "https://balasaravanan.pythonanywhere.com/media/products/IMG_9188.png",
+    "gallery": [
+      {
+        "id": 6,
+        "url": "https://balasaravanan.pythonanywhere.com/media/products/gallery/f7116c9c-8de1-45f9-9c8b-3e0d4d34b38e.jpeg"
+      },
+      {
+        "id": 7,
+        "url": "https://balasaravanan.pythonanywhere.com/media/products/gallery/d2447d8e-be61-4ed6-9fb2-36e8740c943b.jpeg"
+      }
+    ],
+    "createdAt": "2026-07-28T17:41:29.852914+00:00"
+  },
+  {
+    "id": 3,
+    "productCode": "VKSS-02",
+    "name": "Vintage Kanchi Semi Silk",
+    "category": "Kanjivaram",
+    "fabric": "Semi Silk",
+    "price": "2500.00",
+    "mrp": "3000.00",
+    "description": "This bottle green silk saree features fine golden checks with delicate floral motifs woven across the body. It is contrasted by a broad golden zari border with pink/magenta edges and styled with a matching solid pink blouse.",
+    "rating": "4.5",
+    "reviews": 0,
+    "badge": "New",
+    "blousePieceIncluded": true,
+    "soldOut": false,
+    "isListed": true,
+    "hexColor": "#fecb3e",
+    "productColor": "bottle green",
+    "care": [
+      "Dry clean only"
+    ],
+    "image": "https://balasaravanan.pythonanywhere.com/media/products/IMG_9187_VyGgdFU.png",
+    "gallery": [],
+    "createdAt": "2026-07-28T17:51:03.058083+00:00"
+  },
+  {
+    "id": 4,
+    "productCode": "VKSS-03",
+    "name": "Vintage Kanchi Semi Silk",
+    "category": "Kanjivaram",
+    "fabric": "Semi Silk",
+    "price": "2600.00",
+    "mrp": "3200.00",
+    "description": "This deep peacock-green silk saree features a single ornate diamond zari motif woven on the main body. It is accented by a broad, dual-toned olive green and golden zari border with detailed traditional peacock and floral craftsmanship.",
+    "rating": "4.5",
+    "reviews": 0,
+    "badge": "New",
+    "blousePieceIncluded": true,
+    "soldOut": false,
+    "isListed": true,
+    "hexColor": "#fefb41",
+    "productColor": "peacock green",
+    "care": [
+      "Dry clean only"
+    ],
+    "image": "https://balasaravanan.pythonanywhere.com/media/products/IMG_9185.png",
+    "gallery": [
+      {
+        "id": 12,
+        "url": "https://balasaravanan.pythonanywhere.com/media/products/gallery/e1f52d74-873c-4ccd-a501-8dae4adbc11c.jpeg"
+      },
+      {
+        "id": 13,
+        "url": "https://balasaravanan.pythonanywhere.com/media/products/gallery/a5fbe15b-14d2-4d21-9c71-62f8106c9d2a.jpeg"
+      }
+    ],
+    "createdAt": "2026-07-28T17:58:27.133096+00:00"
+  },
+  {
+    "id": 5,
+    "productCode": "VKSS-04",
+    "name": "Vintage Kanchi Semi Silk",
+    "category": "Kanjivaram",
+    "fabric": "Semi Silk",
+    "price": "2900.00",
+    "mrp": "3400.00",
+    "description": "his vibrant magenta-pink silk saree features fine golden grid checks woven throughout with small scattered floral motifs across the body. It is framed by a rich golden zari temple border with dark purple selvedge and paired with a matching pink blouse.",
+    "rating": "4.5",
+    "reviews": 0,
+    "badge": "New",
+    "blousePieceIncluded": true,
+    "soldOut": false,
+    "isListed": true,
+    "hexColor": "#263e0f",
+    "productColor": "magenta pink",
+    "care": [
+      "Dry clean only"
+    ],
+    "image": "https://balasaravanan.pythonanywhere.com/media/products/IMG_9184.png",
+    "gallery": [
+      {
+        "id": 14,
+        "url": "https://balasaravanan.pythonanywhere.com/media/products/gallery/f640ea5c-70b8-4d48-8c79-36e1556e1cee.jpeg"
+      },
+      {
+        "id": 15,
+        "url": "https://balasaravanan.pythonanywhere.com/media/products/gallery/e142f8cc-5525-42a3-a0de-03a6d1499204.jpeg"
+      }
+    ],
+    "createdAt": "2026-07-28T18:05:10.338428+00:00"
+  },
+  {
+    "id": 6,
+    "productCode": "VKSS-05",
+    "name": "Vintage Kanchi Semi Silk",
+    "category": "Kanjivaram",
+    "fabric": "Semi Silk",
+    "price": "2900.00",
+    "mrp": "3400.00",
+    "description": "This chartreuse/olive green silk saree features fine golden grid checks and large floral motifs woven across the body. It is contrasted with a rich emerald green pallu and border decorated with intricate antique zari work, paired with a matching checked blouse.",
+    "rating": "4.5",
+    "reviews": 0,
+    "badge": "New",
+    "blousePieceIncluded": true,
+    "soldOut": false,
+    "isListed": true,
+    "hexColor": "#3f2600",
+    "productColor": "chartreuse green",
+    "care": [
+      "Dry clean only"
+    ],
+    "image": "https://balasaravanan.pythonanywhere.com/media/products/IMG_9179.png",
+    "gallery": [
+      {
+        "id": 16,
+        "url": "https://balasaravanan.pythonanywhere.com/media/products/gallery/08cea1a7-fdec-4049-9691-d122f6fc147b.jpeg"
+      },
+      {
+        "id": 17,
+        "url": "https://balasaravanan.pythonanywhere.com/media/products/gallery/0eef9ee4-e3c1-457e-bfcd-87d922591fe2.jpeg"
+      }
+    ],
+    "createdAt": "2026-07-28T18:11:31.394635+00:00"
+  },
+  {
+    "id": 7,
+    "productCode": "VKSS-06",
+    "name": "Vintage Kanchi Semi Silk",
+    "category": "Kanjivaram",
+    "fabric": "Semi Silk",
+    "price": "2900.00",
+    "mrp": "3400.00",
+    "description": "This dark green silk saree features fine golden grid checks adorned with gold floral buttas across the main body. It is framed by a rich, broad golden zari border with a subtle magenta selvedge and paired with a contrasting magenta blouse.",
+    "rating": "4.5",
+    "reviews": 0,
+    "badge": "New",
+    "blousePieceIncluded": true,
+    "soldOut": false,
+    "isListed": true,
+    "hexColor": "#eeffed",
+    "productColor": "dark green",
+    "care": [
+      "Dry clean only"
+    ],
+    "image": "https://balasaravanan.pythonanywhere.com/media/products/IMG_9191.png",
+    "gallery": [
+      {
+        "id": 18,
+        "url": "https://balasaravanan.pythonanywhere.com/media/products/gallery/c9e13e69-3112-49ec-9969-6483fe25ed1f.jpeg"
+      },
+      {
+        "id": 19,
+        "url": "https://balasaravanan.pythonanywhere.com/media/products/gallery/645c13de-2bad-4d9f-a1c9-72196be3bd13.jpeg"
+      }
+    ],
+    "createdAt": "2026-07-28T18:21:03.027275+00:00"
+  },
+  {
+    "id": 8,
+    "productCode": "VKSS-07",
+    "name": "Vintage Kanchi Semi Silk",
+    "category": "Kanjivaram",
+    "fabric": "Semi Silk",
+    "price": "2900.00",
+    "mrp": "3400.00",
+    "description": "This rich maroon silk saree features fine golden pinstripes and large woven mango/paisley motif buttas across the main body. It is contrasted by a vibrant magenta pallu and border decorated with intricate golden zari geometric patterns and paisley motifs.",
+    "rating": "4.5",
+    "reviews": 0,
+    "badge": "New",
+    "blousePieceIncluded": true,
+    "soldOut": false,
+    "isListed": true,
+    "hexColor": "#010055",
+    "productColor": "rich maroon",
+    "care": [
+      "Dry clean only"
+    ],
+    "image": "https://balasaravanan.pythonanywhere.com/media/products/IMG_9192.png",
+    "gallery": [
+      {
+        "id": 20,
+        "url": "https://balasaravanan.pythonanywhere.com/media/products/gallery/1f1036cd-bbcc-43bf-b9eb-ca4610ae6b39.jpeg"
+      },
+      {
+        "id": 21,
+        "url": "https://balasaravanan.pythonanywhere.com/media/products/gallery/c03be257-e3fb-4b00-9e4d-9d6f7d8b1c94.jpeg"
+      }
+    ],
+    "createdAt": "2026-07-28T18:26:35.436029+00:00"
+  },
+  {
+    "id": 9,
+    "productCode": "VKSS-08",
+    "name": "Vintage Kanchi Semi Silk",
+    "category": "Kanjivaram",
+    "fabric": "Semi Silk",
+    "price": "2900.00",
+    "mrp": "3400.00",
+    "description": "This deep purple silk saree features golden grid checks with distinct teardrop motifs across the body, complemented by a rich emerald green and gold zari border and pallu.",
+    "rating": "4.5",
+    "reviews": 0,
+    "badge": "New",
+    "blousePieceIncluded": true,
+    "soldOut": false,
+    "isListed": true,
+    "hexColor": "#2b1c00",
+    "productColor": "deep purple",
+    "care": [
+      "Dry clean only"
+    ],
+    "image": "https://balasaravanan.pythonanywhere.com/media/products/6e6ee40e-dfe6-4933-9c43-39635adb9978.jpeg",
+    "gallery": [
+      {
+        "id": 22,
+        "url": "https://balasaravanan.pythonanywhere.com/media/products/gallery/e7612962-a327-4440-8159-7b49afe27c0c.jpeg"
+      },
+      {
+        "id": 23,
+        "url": "https://balasaravanan.pythonanywhere.com/media/products/gallery/a469068a-33b3-4aa7-b33b-83392021a614.jpeg"
+      }
+    ],
+    "createdAt": "2026-07-28T18:39:51.312360+00:00"
+  }
+]

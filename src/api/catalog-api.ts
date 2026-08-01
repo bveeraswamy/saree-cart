@@ -19,6 +19,7 @@ export interface InventoryProduct {
   reviews: number;
   badge: string;
   blousePieceIncluded: boolean;
+  deliveryAvailable: boolean;
   soldOut: boolean;
   isListed: boolean;
   hexColor: string;
@@ -43,6 +44,7 @@ export interface NewProductInput {
   reviews?: string;
   badge?: string;
   blousePieceIncluded?: boolean;
+  deliveryAvailable?: boolean;
   hexColor?: string;
   productColor?: string;
   care?: string;
@@ -112,8 +114,10 @@ export async function deleteProduct(token: string, id: number): Promise<void> {
   }
 }
 
-export async function getProduct(id: number | string): Promise<InventoryProduct> {
-  const res = await fetch(`${API_BASE}/api/catalog/products/${id}/`);
+export async function getProduct(id: number | string, token?: string): Promise<InventoryProduct> {
+  const res = await fetch(`${API_BASE}/api/catalog/products/${id}/`, {
+    headers: token ? { Authorization: `Token ${token}` } : {},
+  });
   const body = await res.json().catch(() => ({}));
   if (!res.ok) {
     throw new AuthApiError(body.detail ?? 'Could not load this product.');

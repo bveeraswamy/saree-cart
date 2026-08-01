@@ -19,6 +19,7 @@ export interface Product {
   description: string;
   care: string[];
   blousePieceIncluded: boolean;
+  deliveryAvailable: boolean;
   soldOut?: boolean;
   image?: string | null;
   gallery: string[];

@@ -27,6 +27,7 @@ function mapProduct(p: InventoryProduct): Product {
     description: p.description,
     care: p.care,
     blousePieceIncluded: p.blousePieceIncluded,
+    deliveryAvailable: p.deliveryAvailable,
     soldOut: p.soldOut,
     image: p.image,
     gallery: p.gallery.map((img) => img.url),
@@ -82,6 +83,23 @@ class CatalogStore extends EventTarget {
     return this.fetchNow();
   }
 
+  // Used only when the live API is unreachable; loads the last catalog
+  // snapshot admins exported via the "Export Catalog JSON" dev tool.
+  private async loadFallback(): Promise<boolean> {
+    try {
+      const res = await fetch('/catalog-fallback.json');
+      if (!res.ok) return false;
+      const items = (await res.json()) as InventoryProduct[];
+      if (!Array.isArray(items) || !items.length) return false;
+      this._products = items.map(mapProduct);
+      this._loaded = true;
+      this._error = 'Showing saved catalog data — live server is unreachable.';
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   private fetchNow(): Promise<void> {
     this._loading = true;
     this._error = '';
@@ -91,7 +109,9 @@ class CatalogStore extends EventTarget {
         this._products = items.map(mapProduct);
         this._loaded = true;
       })
-      .catch((err) => {
+      .catch(async (err) => {
+        const fallback = await this.loadFallback();
+        if (fallback) return;
         this._error = err instanceof Error ? err.message : 'Could not load products.';
       })
       .finally(() => {

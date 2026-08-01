@@ -20,6 +20,7 @@ const EMPTY_FORM = {
   reviews: '0',
   badge: '',
   blousePieceIncluded: false,
+  deliveryAvailable: true,
   hexColor: '#7a1030',
   productColor: 'maroon',
   care: '',
@@ -49,6 +50,7 @@ export class ProductEditView extends LitElement {
   @state() private editing = false;
   @state() private form = { ...EMPTY_FORM };
   @state() private galleryItems: GalleryItem[] = [];
+  @state() private replaceIndex: number | null = null;
   @state() private saving = false;
   @state() private saveError = '';
 
@@ -262,6 +264,7 @@ export class ProductEditView extends LitElement {
         border-radius: var(--radius-sm);
         overflow: hidden;
         flex: none;
+        cursor: pointer;
       }
       .thumb img {
         width: 100%;
@@ -272,6 +275,23 @@ export class ProductEditView extends LitElement {
       .thumb.is-cover {
         outline: 2px solid var(--accent);
         outline-offset: 2px;
+      }
+      .thumb-replace {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font: 700 10px var(--sans);
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        color: #fff;
+        background: rgba(0, 0, 0, 0.55);
+        opacity: 0;
+        transition: opacity 0.15s ease;
+      }
+      .thumb:hover .thumb-replace {
+        opacity: 1;
       }
       .thumb .cover-tag {
         position: absolute;
@@ -336,7 +356,7 @@ export class ProductEditView extends LitElement {
     this.error = '';
     this.editing = false;
     try {
-      this.product = await getProduct(this.productId);
+      this.product = await getProduct(this.productId, authStore.user?.token);
     } catch (err) {
       this.error = err instanceof AuthApiError ? err.message : 'Could not reach the server.';
     } finally {
@@ -361,6 +381,7 @@ export class ProductEditView extends LitElement {
       reviews: String(p.reviews),
       badge: p.badge,
       blousePieceIncluded: p.blousePieceIncluded,
+      deliveryAvailable: p.deliveryAvailable,
       hexColor: p.hexColor,
       productColor: p.productColor,
       care: p.care.join('\n'),
@@ -390,13 +411,36 @@ export class ProductEditView extends LitElement {
     this.form = { ...this.form, blousePieceIncluded: value };
   }
 
+  private setDeliveryAvailable(value: boolean) {
+    this.form = { ...this.form, deliveryAvailable: value };
+  }
+
   private openFilePicker() {
+    this.replaceIndex = null;
+    this.renderRoot.querySelector<HTMLInputElement>('#gallery-input')?.click();
+  }
+
+  private openReplacePicker(index: number) {
+    this.replaceIndex = index;
     this.renderRoot.querySelector<HTMLInputElement>('#gallery-input')?.click();
   }
 
   private onFilesSelected(e: Event) {
     const input = e.target as HTMLInputElement;
     const files = Array.from(input.files ?? []);
+    if (this.replaceIndex !== null) {
+      const index = this.replaceIndex;
+      this.replaceIndex = null;
+      const file = files[0];
+      if (!file) return;
+      const replaced = this.galleryItems[index];
+      if (replaced?.kind === 'new') URL.revokeObjectURL(replaced.url);
+      const next = [...this.galleryItems];
+      next[index] = { token: '', kind: 'new', url: URL.createObjectURL(file), file };
+      this.galleryItems = next;
+      input.value = '';
+      return;
+    }
     const added: GalleryItem[] = files.map((file) => ({
       token: '',
       kind: 'new',
@@ -614,6 +658,17 @@ export class ProductEditView extends LitElement {
               <label class="checkbox-label">
                 <input
                   type="checkbox"
+                  .checked=${f.deliveryAvailable}
+                  @change=${(e: Event) =>
+                    this.setDeliveryAvailable((e.target as HTMLInputElement).checked)}
+                />
+                Delivery Available
+              </label>
+            </div>
+            <div class="field checkbox-field">
+              <label class="checkbox-label">
+                <input
+                  type="checkbox"
                   .checked=${f.soldOut}
                   @change=${(e: Event) => this.setSoldOut((e.target as HTMLInputElement).checked)}
                 />
@@ -635,14 +690,22 @@ export class ProductEditView extends LitElement {
               <div class="gallery-picker">
                 ${this.galleryItems.map(
                   (img, i) => html`
-                    <div class="thumb ${i === 0 ? 'is-cover' : ''}">
+                    <div
+                      class="thumb ${i === 0 ? 'is-cover' : ''}"
+                      title="Click to replace image"
+                      @click=${() => this.openReplacePicker(i)}
+                    >
                       <img src=${img.url} alt="" />
+                      <span class="thumb-replace">Replace</span>
                       ${i === 0 ? html`<span class="cover-tag">Cover</span>` : nothing}
                       <button
                         type="button"
                         class="thumb-remove"
                         aria-label="Remove image"
-                        @click=${() => this.removeGalleryItem(i)}
+                        @click=${(e: Event) => {
+                          e.stopPropagation();
+                          this.removeGalleryItem(i);
+                        }}
                       >
                         ✕
                       </button>
@@ -704,6 +767,9 @@ export class ProductEditView extends LitElement {
         ${p.badge ? html`<div class="row"><span>Badge</span><span>${p.badge}</span></div>` : nothing}
         <div class="row">
           <span>Blouse Piece</span><span>${p.blousePieceIncluded ? 'Included' : 'Not included'}</span>
+        </div>
+        <div class="row">
+          <span>Delivery</span><span>${p.deliveryAvailable ? 'Available' : 'Not available'}</span>
         </div>
         <div class="row">
           <span>Container Background</span>

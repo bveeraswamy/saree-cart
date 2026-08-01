@@ -157,7 +157,7 @@ export class HomeView extends LitElement {
     const products = catalogStore.products;
     const bestsellers = products.filter((p) => p.badge === 'Bestseller').slice(0, 4);
     const newArrivals = products.filter((p) => p.badge === 'New').slice(0, 4);
-    const trending = products.slice(0, 8);
+    const trending = products;
 
     return html`
       <img

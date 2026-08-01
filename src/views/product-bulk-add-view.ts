@@ -6,6 +6,7 @@ import { createProduct, type NewProductInput } from '../api/catalog-api';
 import { AuthApiError } from '../api/auth-api';
 import { sharedStyles } from '../styles/shared-styles';
 import { randomPleasantHex } from '../utils/color';
+import '../components/success-dialog';
 
 const EMPTY_SHARED = {
   name: '',
@@ -46,6 +47,7 @@ export class ProductBulkAddView extends LitElement {
   @state() private rows: BulkRow[] = [emptyRow(), emptyRow(), emptyRow()];
   @state() private saving = false;
   @state() private saveError = '';
+  @state() private successMessage = '';
 
   static styles = [
     sharedStyles,
@@ -288,7 +290,7 @@ export class ProductBulkAddView extends LitElement {
     this.saving = false;
     catalogStore.refresh();
     if (successCount === targets.length) {
-      location.hash = '#/account';
+      this.successMessage = `${successCount} product${successCount === 1 ? '' : 's'} added to your catalog.`;
     } else {
       this.saveError = `${successCount} of ${targets.length} products added. Fix the failed row(s) below and submit again.`;
     }
@@ -476,6 +478,12 @@ export class ProductBulkAddView extends LitElement {
           </div>
         </form>
       </div>
+      <success-dialog
+        .open=${!!this.successMessage}
+        heading="Products Added"
+        .message=${this.successMessage}
+        @close=${() => (location.hash = '#/account')}
+      ></success-dialog>
     `;
   }
 }

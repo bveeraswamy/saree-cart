@@ -6,6 +6,7 @@ import { createProduct, type NewProductInput } from '../api/catalog-api';
 import { AuthApiError } from '../api/auth-api';
 import { sharedStyles } from '../styles/shared-styles';
 import { randomPleasantHex } from '../utils/color';
+import '../components/success-dialog';
 
 const EMPTY_FORM = {
   productCode: '',
@@ -40,6 +41,7 @@ export class ProductAddView extends LitElement {
   @state() private images: PickedImage[] = [];
   @state() private saving = false;
   @state() private saveError = '';
+  @state() private successMessage = '';
 
   static styles = [
     sharedStyles,
@@ -261,13 +263,13 @@ export class ProductAddView extends LitElement {
             .filter(Boolean)
         ),
       };
-      await createProduct(
+      const created = await createProduct(
         user.token,
         payload,
         this.images.map((img) => img.file)
       );
       catalogStore.refresh();
-      location.hash = '#/account';
+      this.successMessage = `${created.name} (${created.productCode ?? 'no code'}) was added to your catalog.`;
     } catch (err) {
       this.saveError = err instanceof AuthApiError ? err.message : 'Could not reach the server.';
     } finally {
@@ -489,6 +491,12 @@ export class ProductAddView extends LitElement {
           </div>
         </form>
       </div>
+      <success-dialog
+        .open=${!!this.successMessage}
+        heading="Product Added"
+        .message=${this.successMessage}
+        @close=${() => (location.hash = '#/account')}
+      ></success-dialog>
     `;
   }
 }

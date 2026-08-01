@@ -192,10 +192,10 @@ export class HomeView extends LitElement {
 
       <div class="promo">
         <div>
-          <strong>Wedding Edit</strong>
-          <span>Bridal silks &amp; heirloom weaves</span>
+          <strong>Kanjivaram Edit</strong>
+          <span>Handwoven silks &amp; heirloom zari borders</span>
         </div>
-        <button @click=${() => this.go('#/shop/wedding')}>Explore</button>
+        <button @click=${() => this.go('#/shop/kanjivaram')}>Explore</button>
       </div>
 
       ${newArrivals.length

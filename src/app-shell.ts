@@ -13,6 +13,7 @@ import './views/account-view';
 import './views/user-detail-view';
 import './views/product-edit-view';
 import './views/product-add-view';
+import './views/product-bulk-add-view';
 import './views/checkout-view';
 
 type Route =
@@ -24,6 +25,7 @@ type Route =
   | { name: 'userDetail'; username: string }
   | { name: 'productEdit'; id: string }
   | { name: 'productAdd' }
+  | { name: 'productBulkAdd' }
   | { name: 'checkout'; id: string };
 
 function parseRoute(hash: string): Route {
@@ -45,6 +47,7 @@ function parseRoute(hash: string): Route {
     case 'account':
       if (segs[1] === 'users' && segs[2]) return { name: 'userDetail', username: segs[2] };
       if (segs[1] === 'inventory' && segs[2] === 'new') return { name: 'productAdd' };
+      if (segs[1] === 'inventory' && segs[2] === 'bulk') return { name: 'productBulkAdd' };
       if (segs[1] === 'inventory' && segs[2]) return { name: 'productEdit', id: segs[2] };
       return { name: 'account' };
     default:
@@ -203,6 +206,8 @@ export class AppShell extends LitElement {
         return html`<product-edit-view .productId=${this.route.id}></product-edit-view>`;
       case 'productAdd':
         return html`<product-add-view></product-add-view>`;
+      case 'productBulkAdd':
+        return html`<product-bulk-add-view></product-bulk-add-view>`;
       case 'checkout':
         return html`<checkout-view .productId=${this.route.id}></checkout-view>`;
     }

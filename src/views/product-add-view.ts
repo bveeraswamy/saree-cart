@@ -5,6 +5,7 @@ import { catalogStore } from '../state/catalog-store';
 import { createProduct, type NewProductInput } from '../api/catalog-api';
 import { AuthApiError } from '../api/auth-api';
 import { sharedStyles } from '../styles/shared-styles';
+import { randomPleasantHex } from '../utils/color';
 
 const EMPTY_FORM = {
   productCode: '',
@@ -20,6 +21,7 @@ const EMPTY_FORM = {
   reviews: '0',
   badge: '',
   blousePieceIncluded: false,
+  deliveryAvailable: true,
   hexColor: '#7a1030',
   productColor: 'maroon',
   care: '',
@@ -34,7 +36,7 @@ interface PickedImage {
 
 @customElement('product-add-view')
 export class ProductAddView extends LitElement {
-  @state() private form = { ...EMPTY_FORM };
+  @state() private form = { ...EMPTY_FORM, hexColor: randomPleasantHex() };
   @state() private images: PickedImage[] = [];
   @state() private saving = false;
   @state() private saveError = '';
@@ -210,6 +212,10 @@ export class ProductAddView extends LitElement {
 
   private setBlousePieceIncluded(value: boolean) {
     this.form = { ...this.form, blousePieceIncluded: value };
+  }
+
+  private setDeliveryAvailable(value: boolean) {
+    this.form = { ...this.form, deliveryAvailable: value };
   }
 
   private openFilePicker() {
@@ -410,6 +416,16 @@ export class ProductAddView extends LitElement {
                 @change=${(e: Event) => this.setBlousePieceIncluded((e.target as HTMLInputElement).checked)}
               />
               Blouse Piece Included
+            </label>
+          </div>
+          <div class="field checkbox-field">
+            <label class="checkbox-label">
+              <input
+                type="checkbox"
+                .checked=${f.deliveryAvailable}
+                @change=${(e: Event) => this.setDeliveryAvailable((e.target as HTMLInputElement).checked)}
+              />
+              Delivery Available
             </label>
           </div>
           <div class="field checkbox-field">

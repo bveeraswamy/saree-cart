@@ -18,3 +18,22 @@ export function mixWithWhite([r, g, b]: [number, number, number], amount: number
   const mix = (c: number) => Math.round(c + (255 - c) * amount);
   return `${mix(r)}, ${mix(g)}, ${mix(b)}`;
 }
+
+function hslToHex(h: number, s: number, l: number): string {
+  const sat = s / 100;
+  const light = l / 100;
+  const k = (n: number) => (n + h / 30) % 12;
+  const a = sat * Math.min(light, 1 - light);
+  const f = (n: number) => light - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
+  const toHex = (x: number) => Math.round(x * 255).toString(16).padStart(2, '0');
+  return `#${toHex(f(0))}${toHex(f(8))}${toHex(f(4))}`;
+}
+
+// Muted, jewel-toned hues that suit a saree swatch background — avoids
+// neon/pastel extremes so a random pick still looks intentional.
+export function randomPleasantHex(): string {
+  const hue = Math.floor(Math.random() * 360);
+  const saturation = 35 + Math.random() * 30;
+  const lightness = 28 + Math.random() * 24;
+  return hslToHex(hue, saturation, lightness);
+}

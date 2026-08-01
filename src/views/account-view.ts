@@ -245,22 +245,34 @@ export class AccountView extends LitElement {
       .with-fab {
         padding-bottom: 76px;
       }
-      .fab-add {
+      .fab-row {
         position: fixed;
         left: 50%;
         transform: translateX(-50%);
         bottom: calc(var(--nav-h) + var(--safe-b) + 14px);
         width: calc(100% - 32px);
         max-width: 528px;
+        display: flex;
+        gap: 8px;
+        z-index: 15;
+      }
+      .fab-row button {
+        flex: 1;
         height: 48px;
         border-radius: var(--radius-sm);
+        font: 700 14px var(--sans);
+        cursor: pointer;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+      }
+      .fab-add {
         border: none;
         background: var(--accent);
         color: var(--accent-contrast);
-        font: 700 14px var(--sans);
-        cursor: pointer;
-        z-index: 15;
-        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+      }
+      .fab-bulk {
+        border: 1.5px solid var(--accent);
+        background: var(--bg-elevated);
+        color: var(--accent);
       }
     `,
   ];
@@ -577,9 +589,14 @@ export class AccountView extends LitElement {
         <div class=${showInventory ? 'with-fab' : ''}>${content}</div>
         ${showInventory
           ? html`
-              <button class="fab-add" @click=${() => (location.hash = '#/account/inventory/new')}>
-                + Add Product
-              </button>
+              <div class="fab-row">
+                <button class="fab-add" @click=${() => (location.hash = '#/account/inventory/new')}>
+                  + Add Product
+                </button>
+                <button class="fab-bulk" @click=${() => (location.hash = '#/account/inventory/bulk')}>
+                  Bulk Add
+                </button>
+              </div>
             `
           : nothing}
       `;

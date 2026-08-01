@@ -13,6 +13,14 @@
   --gold-soft: #3a2c17;
   --good: #4ade80;
   --bad: #f87171;
+  --badge-new: #7ec8dd;
+  --badge-new-contrast: #0c2830;
+  --badge-bestseller: var(--gold);
+  --badge-bestseller-contrast: #2a1a05;
+  --badge-sale: #f0876f;
+  --badge-sale-contrast: #2a0e07;
+  --badge-limited: #b79bef;
+  --badge-limited-contrast: #1e1338;
   --code-bg: #201812;
   --mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
   --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, Roboto, sans-serif;

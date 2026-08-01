@@ -124,6 +124,22 @@ export class ProductCard extends LitElement {
       background: var(--accent);
       color: var(--accent-contrast);
     }
+    .badge-tag.badge-new {
+      background: var(--badge-new);
+      color: var(--badge-new-contrast);
+    }
+    .badge-tag.badge-bestseller {
+      background: var(--badge-bestseller);
+      color: var(--badge-bestseller-contrast);
+    }
+    .badge-tag.badge-sale {
+      background: var(--badge-sale);
+      color: var(--badge-sale-contrast);
+    }
+    .badge-tag.badge-limited {
+      background: var(--badge-limited);
+      color: var(--badge-limited-contrast);
+    }
     .sold-out-overlay {
       position: absolute;
       inset: 0;
@@ -233,7 +249,11 @@ export class ProductCard extends LitElement {
     return html`
       <div class="card" @click=${this.go}>
         <div class="media" style="background:${p.containerColor}">
-          ${p.soldOut ? '' : p.badge ? html`<span class="badge-tag">${p.badge}</span>` : ''}
+          ${p.soldOut
+            ? ''
+            : p.badge
+              ? html`<span class="badge-tag badge-${p.badge.toLowerCase()}">${p.badge}</span>`
+              : ''}
           <button
             class="wish ${active ? 'active' : ''}"
             aria-label="Toggle wishlist"

@@ -242,27 +242,21 @@ export class AccountView extends LitElement {
         text-align: center;
         padding: 10px 0 18px;
       }
-      .with-fab {
-        padding-bottom: 76px;
+      .product-list-scroll {
+        max-height: 55vh;
+        overflow-y: auto;
       }
-      .fab-row {
-        position: fixed;
-        left: 50%;
-        transform: translateX(-50%);
-        bottom: calc(var(--nav-h) + var(--safe-b) + 14px);
-        width: calc(100% - 32px);
-        max-width: 528px;
+      .inventory-actions {
         display: flex;
         gap: 8px;
-        z-index: 15;
+        margin-top: 12px;
       }
-      .fab-row button {
+      .inventory-actions button {
         flex: 1;
         height: 48px;
         border-radius: var(--radius-sm);
         font: 700 14px var(--sans);
         cursor: pointer;
-        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
       }
       .fab-add {
         border: none;
@@ -503,40 +497,46 @@ export class AccountView extends LitElement {
             placeholder="Filter by product code"
           />
         </div>
-        ${this.productsLoading
-          ? html`<p>Loading products…</p>`
-          : filtered.length
-            ? filtered.map(
-                (p) => html`
-                  <div
-                    class="product-row"
-                    @click=${() =>
-                      (location.hash = `#/account/inventory/${encodeURIComponent(p.productCode || String(p.id))}`)}
-                  >
-                    <div class="meta">
-                      <div class="name">${p.name}</div>
-                      <div class="sub">${p.productCode ? `${p.productCode} · ` : ''}${p.category} · ${p.fabric}</div>
-                    </div>
-                    <span class="price">₹${Number(p.price).toLocaleString('en-IN')}</span>
-                    <button
-                      class="remove"
-                      aria-label="Remove ${p.name}"
-                      @click=${(e: Event) => {
-                        e.stopPropagation();
-                        this.onDeleteProduct(p.id);
-                      }}
+        <div class="product-list-scroll">
+          ${this.productsLoading
+            ? html`<p>Loading products…</p>`
+            : filtered.length
+              ? filtered.map(
+                  (p) => html`
+                    <div
+                      class="product-row"
+                      @click=${() =>
+                        (location.hash = `#/account/inventory/${encodeURIComponent(p.productCode || String(p.id))}`)}
                     >
-                      ✕
-                    </button>
-                  </div>
-                `
-              )
-            : html`
-                <p class="empty-note">
-                  ${this.products.length ? 'No products match that code.' : 'No products in inventory yet.'}
-                </p>
-              `}
-        ${this.productsError ? html`<p class="error">${this.productsError}</p>` : nothing}
+                      <div class="meta">
+                        <div class="name">${p.name}</div>
+                        <div class="sub">${p.productCode ? `${p.productCode} · ` : ''}${p.category} · ${p.fabric}</div>
+                      </div>
+                      <span class="price">₹${Number(p.price).toLocaleString('en-IN')}</span>
+                      <button
+                        class="remove"
+                        aria-label="Remove ${p.name}"
+                        @click=${(e: Event) => {
+                          e.stopPropagation();
+                          this.onDeleteProduct(p.id);
+                        }}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  `
+                )
+              : html`
+                  <p class="empty-note">
+                    ${this.products.length ? 'No products match that code.' : 'No products in inventory yet.'}
+                  </p>
+                `}
+          ${this.productsError ? html`<p class="error">${this.productsError}</p>` : nothing}
+        </div>
+      </div>
+      <div class="inventory-actions">
+        <button class="fab-add" @click=${() => (location.hash = '#/account/inventory/new')}>+ Add Product</button>
+        <button class="fab-bulk" @click=${() => (location.hash = '#/account/inventory/bulk')}>Bulk Add</button>
       </div>
     `;
   }
@@ -586,19 +586,7 @@ export class AccountView extends LitElement {
               </div>
             `
           : nothing}
-        <div class=${showInventory ? 'with-fab' : ''}>${content}</div>
-        ${showInventory
-          ? html`
-              <div class="fab-row">
-                <button class="fab-add" @click=${() => (location.hash = '#/account/inventory/new')}>
-                  + Add Product
-                </button>
-                <button class="fab-bulk" @click=${() => (location.hash = '#/account/inventory/bulk')}>
-                  Bulk Add
-                </button>
-              </div>
-            `
-          : nothing}
+        ${content}
       `;
     }
 

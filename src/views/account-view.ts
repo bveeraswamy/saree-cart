@@ -483,7 +483,30 @@ export class AccountView extends LitElement {
   private get filteredProducts() {
     const q = this.productCodeFilter.trim().toLowerCase();
     if (!q) return this.products;
-    return this.products.filter((p) => (p.productCode ?? '').toLowerCase().includes(q));
+    return this.products.filter((p) => {
+      const haystack = [
+        p.productCode,
+        p.name,
+        p.category,
+        p.fabric,
+        p.badge,
+        p.productColor,
+        p.description,
+        p.price,
+        p.mrp,
+        p.rating,
+        String(p.reviews),
+        ...p.care,
+        p.soldOut ? 'sold out soldout' : 'in stock instock',
+        p.isListed ? 'listed' : 'unlisted',
+        p.blousePieceIncluded ? 'blouse piece included blousepiece' : 'no blouse piece',
+        p.deliveryAvailable ? 'delivery available' : 'delivery not available deliveryunavailable',
+      ]
+        .filter((v): v is string => !!v)
+        .join(' ')
+        .toLowerCase();
+      return haystack.includes(q);
+    });
   }
 
   private renderInventoryTab() {
@@ -494,7 +517,7 @@ export class AccountView extends LitElement {
           <input
             .value=${this.productCodeFilter}
             @input=${(e: Event) => (this.productCodeFilter = (e.target as HTMLInputElement).value)}
-            placeholder="Filter by product code"
+            placeholder="Filter by code, name, category, color, badge…"
           />
         </div>
         <div class="product-list-scroll">
@@ -528,7 +551,7 @@ export class AccountView extends LitElement {
                 )
               : html`
                   <p class="empty-note">
-                    ${this.products.length ? 'No products match that code.' : 'No products in inventory yet.'}
+                    ${this.products.length ? 'No products match that filter.' : 'No products in inventory yet.'}
                   </p>
                 `}
           ${this.productsError ? html`<p class="error">${this.productsError}</p>` : nothing}

@@ -19,6 +19,10 @@ export class ProductDetailView extends LitElement {
   @state() private photoIndex = 0;
   @state() private lightboxOpen = false;
 
+  private touchActive = false;
+  private touchStartX = 0;
+  private touchStartY = 0;
+
   // retains a StoreController subscription to re-render on store changes
   wishlist = new StoreController(this, wishlistStore);
   // retains a StoreController subscription to re-render on store changes
@@ -60,6 +64,7 @@ export class ProductDetailView extends LitElement {
         border-radius: var(--radius);
         overflow: hidden;
         background: var(--bg-sunken);
+        touch-action: pan-y;
       }
       .lightbox-frame {
         width: 100%;
@@ -361,6 +366,27 @@ export class ProductDetailView extends LitElement {
     this.photoIndex = (this.photoIndex + 1) % count;
   }
 
+  private onTouchStart(e: TouchEvent) {
+    const t = e.touches[0];
+    this.touchStartX = t.clientX;
+    this.touchStartY = t.clientY;
+    this.touchActive = true;
+  }
+
+  private onTouchEnd(e: TouchEvent, count: number) {
+    if (!this.touchActive) return;
+    this.touchActive = false;
+    if (count <= 1) return;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - this.touchStartX;
+    const dy = t.clientY - this.touchStartY;
+    const SWIPE_THRESHOLD = 40;
+    if (Math.abs(dx) > SWIPE_THRESHOLD && Math.abs(dx) > Math.abs(dy)) {
+      if (dx < 0) this.nextPhoto(count);
+      else this.prevPhoto(count);
+    }
+  }
+
   private renderPhotoStage(
     photos: string[],
     activeIndex: number,
@@ -374,6 +400,8 @@ export class ProductDetailView extends LitElement {
       <div
         class="${frameClass} ${product.soldOut ? 'sold-out' : ''}"
         @click=${(e: Event) => e.stopPropagation()}
+        @touchstart=${(e: TouchEvent) => this.onTouchStart(e)}
+        @touchend=${(e: TouchEvent) => this.onTouchEnd(e, photos.length)}
       >
         <saree-swatch .hex=${product.containerColor} .pattern=${pattern} hidePallu></saree-swatch>
         ${photos.map(

@@ -66,10 +66,10 @@ export class HomeView extends LitElement {
         margin: 0 0 6px;
       }
       .hero h1 {
-        font-size: 22px;
-        line-height: 1.25;
+        font-size: 17px;
+        line-height: 1.4;
         margin: 0 0 10px;
-        max-width: 22ch;
+        max-width: 42ch;
       }
       .hero button {
         font: 700 13px var(--sans);
@@ -168,9 +168,11 @@ export class HomeView extends LitElement {
       />
 
       <div class="hero">
-        <p class="eyebrow">Festive Edit 2026</p>
+        <p class="eyebrow">Saree Expo</p>
         <!--<h1>Handwoven sarees, curated for every occasion</h1>-->
-        <h1>Coming soon</h1>
+        <h1>
+          Visit us at No. 325, Bharathiyar Road, Maniyakarampalayam, Ganapathy, Coimbatore - 641006, Tamil Nadu
+        </h1>
         <!--<button @click=${() => this.go('#/shop')}>Shop the collection</button>-->
       </div>
 

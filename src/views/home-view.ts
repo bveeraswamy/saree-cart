@@ -6,6 +6,12 @@ import { sharedStyles } from '../styles/shared-styles';
 import '../components/category-chips';
 import '../components/product-grid';
 
+const EXPO_ADDRESS =
+  'No. 325, Bharathiyar Road, Maniyakarampalayam, Ganapathy, Coimbatore - 641006, Tamil Nadu';
+// Exact pin coordinates for the venue (confirmed via Google Maps), used
+// instead of a text-search so the link never depends on geocoding guesses.
+const EXPO_COORDS = '11.048024,76.975682';
+
 @customElement('home-view')
 export class HomeView extends LitElement {
   @state() private logoLoaded = false;
@@ -47,6 +53,9 @@ export class HomeView extends LitElement {
         margin-bottom: 18px;
         position: relative;
         overflow: hidden;
+        display: flex;
+        align-items: center;
+        gap: 12px;
       }
       .hero::after {
         content: '';
@@ -58,18 +67,52 @@ export class HomeView extends LitElement {
         border-radius: 50%;
         background: rgba(255, 255, 255, 0.12);
       }
-      .hero .eyebrow {
-        font: 700 11px var(--sans);
+      .hero-text {
+        flex: 1;
+        min-width: 0;
+      }
+      .map-link {
+        flex: none;
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        text-decoration: none;
+        color: inherit;
+      }
+      .map-embed {
+        width: 76px;
+        height: 76px;
+        border: 2px solid var(--accent-contrast);
+        border-radius: 12px;
+        /* Purely a visual preview — the wrapping <a> handles the tap, so
+           the iframe itself must never intercept touch/scroll gestures. */
+        pointer-events: none;
+        background: var(--bg-sunken);
+      }
+      .map-link span:last-child {
+        font: 700 9.5px var(--sans);
         text-transform: uppercase;
-        letter-spacing: 0.08em;
-        opacity: 0.85;
-        margin: 0 0 6px;
+        letter-spacing: 0.02em;
+      }
+      .hero .eyebrow {
+        font: 800 30px var(--sans);
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+        opacity: 1;
+        margin: 0 0 8px;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
       }
       .hero h1 {
-        font-size: 17px;
-        line-height: 1.4;
+        font-size: 10.5px;
+        font-weight: 700;
+        line-height: 1.5;
         margin: 0 0 10px;
-        max-width: 42ch;
+        max-width: 44ch;
+        opacity: 1;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
       }
       .hero button {
         font: 700 13px var(--sans);
@@ -168,12 +211,28 @@ export class HomeView extends LitElement {
       />
 
       <div class="hero">
-        <p class="eyebrow">Saree Expo</p>
-        <!--<h1>Handwoven sarees, curated for every occasion</h1>-->
-        <h1>
-          Visit us at No. 325, Bharathiyar Road, Maniyakarampalayam, Ganapathy, Coimbatore - 641006, Tamil Nadu
-        </h1>
-        <!--<button @click=${() => this.go('#/shop')}>Shop the collection</button>-->
+        <div class="hero-text">
+          <p class="eyebrow">Saree Expo</p>
+          <!--<h1>Handwoven sarees, curated for every occasion</h1>-->
+          <h1>Visit us at ${EXPO_ADDRESS}</h1>
+          <!--<button @click=${() => this.go('#/shop')}>Shop the collection</button>-->
+        </div>
+        <a
+          class="map-link"
+          href=${`https://www.google.com/maps/search/?api=1&query=${EXPO_COORDS}`}
+          target="_blank"
+          rel="noopener"
+          aria-label="Open in Google Maps"
+        >
+          <iframe
+            class="map-embed"
+            src=${`https://www.google.com/maps?q=${EXPO_COORDS}&z=15&output=embed`}
+            loading="lazy"
+            title="Saree Expo location"
+            tabindex="-1"
+          ></iframe>
+          <span>Google Maps</span>
+        </a>
       </div>
 
       <category-chips

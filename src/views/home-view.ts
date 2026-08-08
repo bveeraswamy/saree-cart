@@ -47,8 +47,10 @@ export class HomeView extends LitElement {
       }
       .hero {
         border-radius: var(--radius);
-        background: linear-gradient(135deg, var(--accent-strong), var(--accent));
-        color: var(--accent-contrast);
+        background:
+          linear-gradient(135deg, rgba(42, 13, 23, 0.18), rgba(122, 16, 48, 0.12)),
+          url('/shop.jpg') center 30% / cover;
+        color: var(--text);
         padding: 22px 18px;
         margin-bottom: 18px;
         position: relative;
@@ -65,11 +67,15 @@ export class HomeView extends LitElement {
         width: 140px;
         height: 140px;
         border-radius: 50%;
-        background: rgba(255, 255, 255, 0.12);
+        background: rgba(255, 255, 255, 0.1);
       }
       .hero-text {
         flex: 1;
         min-width: 0;
+        background: rgba(20, 6, 11, 0.4);
+        border-radius: 10px;
+        padding: 8px 10px;
+        margin: -8px -10px;
       }
       .map-link {
         flex: none;
@@ -85,12 +91,13 @@ export class HomeView extends LitElement {
       .map-embed {
         width: 76px;
         height: 76px;
-        border: 2px solid var(--accent-contrast);
+        border: 2px solid var(--text);
         border-radius: 12px;
         /* Purely a visual preview — the wrapping <a> handles the tap, so
            the iframe itself must never intercept touch/scroll gestures. */
         pointer-events: none;
         background: var(--bg-sunken);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
       }
       .map-link span:last-child {
         font: 700 9.5px var(--sans);
@@ -103,7 +110,7 @@ export class HomeView extends LitElement {
         letter-spacing: 0.02em;
         opacity: 1;
         margin: 0 0 8px;
-        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+        text-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
       }
       .hero h1 {
         font-size: 10.5px;
@@ -112,11 +119,11 @@ export class HomeView extends LitElement {
         margin: 0 0 10px;
         max-width: 44ch;
         opacity: 1;
-        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
       }
       .hero button {
         font: 700 13px var(--sans);
-        background: var(--accent-contrast);
+        background: var(--text);
         color: var(--accent-strong);
         border: none;
         border-radius: 20px;

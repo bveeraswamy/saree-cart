@@ -39,7 +39,7 @@ export class CheckoutView extends LitElement {
       .thumb {
         width: 68px;
         height: 90px;
-        object-fit: cover;
+        object-fit: fill;
         border-radius: var(--radius-sm);
         flex: none;
         background: var(--bg-sunken);

@@ -141,7 +141,7 @@ export class AppShell extends LitElement {
     const route = this.route;
     switch (route.name) {
       case 'shop':
-        return { showBack: false, showSearch: true, label: '' };
+        return { showBack: true, showSearch: true, label: '' };
       case 'product':
         return {
           showBack: true,

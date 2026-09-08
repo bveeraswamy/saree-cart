@@ -141,7 +141,7 @@ export class ProductAddView extends LitElement {
       .thumb img {
         width: 100%;
         height: 100%;
-        object-fit: cover;
+        object-fit: fill;
         display: block;
       }
       .thumb.is-cover {

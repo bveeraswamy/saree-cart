@@ -85,7 +85,7 @@ export class ProductDetailView extends LitElement {
         left: 5%;
         width: 89%;
         height: 100%;
-        object-fit: cover;
+        object-fit: fill;
         border-radius: var(--radius-sm);
         background: var(--bg-sunken);
         opacity: 0;

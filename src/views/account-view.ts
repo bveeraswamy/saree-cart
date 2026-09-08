@@ -15,10 +15,20 @@ import {
 } from '../api/auth-api';
 import { listProducts, deleteProduct, type InventoryProduct } from '../api/catalog-api';
 import { catalogStore } from '../state/catalog-store';
+import { expoStore, DEFAULT_FALLBACK_MESSAGE } from '../state/expo-store';
+import { updateExpoConfig } from '../api/expo-api';
 import { sharedStyles } from '../styles/shared-styles';
 
 type Mode = 'signin' | 'signup';
-type AdminTab = 'profile' | 'users' | 'inventory';
+type AdminTab = 'profile' | 'users' | 'inventory' | 'expo';
+
+const EMPTY_EXPO_FORM = {
+  header: '',
+  description: '',
+  location: '',
+  fallbackMessage: '',
+  isActive: false,
+};
 
 @customElement('account-view')
 export class AccountView extends LitElement {
@@ -47,8 +57,18 @@ export class AccountView extends LitElement {
   @state() private exporting = false;
   @state() private exportMessage = '';
 
-  // retains a StoreController subscription to re-render on store changes
+  @state() private expoForm = { ...EMPTY_EXPO_FORM };
+  @state() private expoFormReady = false;
+  @state() private expoBackgroundFile: File | null = null;
+  @state() private expoBackgroundPreview = '';
+  @state() private expoRemoveBackground = false;
+  @state() private expoSaving = false;
+  @state() private expoError = '';
+  @state() private expoSaveMessage = '';
+
+  // retains StoreController subscriptions to re-render on store changes
   auth = new StoreController(this, authStore);
+  expo = new StoreController(this, expoStore);
 
   static styles = [
     sharedStyles,
@@ -106,9 +126,66 @@ export class AccountView extends LitElement {
         border-radius: var(--radius-sm);
         padding: 11px 12px;
       }
-      input:focus {
+      input:focus,
+      textarea:focus {
         outline: 2px solid var(--accent);
         outline-offset: -1px;
+      }
+      textarea {
+        width: 100%;
+        font: 500 14px var(--sans);
+        color: var(--text);
+        background: var(--bg-elevated);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        padding: 11px 12px;
+        resize: vertical;
+        min-height: 70px;
+        font-family: var(--sans);
+      }
+      .hint-text {
+        font-size: 11.5px;
+        color: var(--text-faint);
+        margin: 5px 0 0;
+      }
+      .checkbox-field {
+        margin-bottom: 18px;
+      }
+      .checkbox-label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+        color: var(--text);
+        margin-bottom: 0;
+        cursor: pointer;
+      }
+      .checkbox-label input {
+        width: auto;
+        cursor: pointer;
+      }
+      .bg-picker {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .bg-preview {
+        width: 88px;
+        height: 60px;
+        border-radius: var(--radius-sm);
+        object-fit: fill;
+        border: 1px solid var(--border);
+        flex: none;
+        background: var(--bg-sunken);
+      }
+      .bg-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .bg-actions button {
+        font: 700 12px var(--sans);
+        cursor: pointer;
       }
       .error {
         font-size: 12.5px;
@@ -271,6 +348,11 @@ export class AccountView extends LitElement {
     `,
   ];
 
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    if (this.expoBackgroundPreview) URL.revokeObjectURL(this.expoBackgroundPreview);
+  }
+
   private setMode(mode: Mode) {
     this.mode = mode;
     this.error = '';
@@ -353,6 +435,70 @@ export class AccountView extends LitElement {
     } catch (err) {
       this.products = previous;
       this.productsError = err instanceof AuthApiError ? err.message : 'Could not reach the server.';
+    }
+  }
+
+  private async openExpoTab() {
+    this.adminTab = 'expo';
+    await expoStore.load();
+    if (!this.expoFormReady && expoStore.config) {
+      const config = expoStore.config;
+      this.expoForm = {
+        header: config.header,
+        description: config.description,
+        location: config.location,
+        fallbackMessage: config.fallbackMessage || DEFAULT_FALLBACK_MESSAGE,
+        isActive: config.isActive,
+      };
+      this.expoFormReady = true;
+    }
+  }
+
+  private setExpoField<K extends keyof typeof EMPTY_EXPO_FORM>(key: K, value: (typeof EMPTY_EXPO_FORM)[K]) {
+    this.expoForm = { ...this.expoForm, [key]: value };
+  }
+
+  private onExpoBackgroundSelected(e: Event) {
+    const input = e.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file) return;
+    if (this.expoBackgroundPreview) URL.revokeObjectURL(this.expoBackgroundPreview);
+    this.expoBackgroundFile = file;
+    this.expoBackgroundPreview = URL.createObjectURL(file);
+    this.expoRemoveBackground = false;
+  }
+
+  private onRemoveExpoBackground() {
+    if (this.expoBackgroundPreview) URL.revokeObjectURL(this.expoBackgroundPreview);
+    this.expoBackgroundFile = null;
+    this.expoBackgroundPreview = '';
+    this.expoRemoveBackground = true;
+  }
+
+  private async onSaveExpo(e: Event) {
+    e.preventDefault();
+    const admin = authStore.user;
+    if (!admin || this.expoSaving) return;
+    this.expoSaving = true;
+    this.expoError = '';
+    this.expoSaveMessage = '';
+    try {
+      const updated = await updateExpoConfig(
+        admin.token,
+        { ...this.expoForm, removeBackground: this.expoRemoveBackground },
+        this.expoBackgroundFile
+      );
+      expoStore.setConfig(updated);
+      if (this.expoBackgroundPreview) URL.revokeObjectURL(this.expoBackgroundPreview);
+      this.expoBackgroundFile = null;
+      this.expoBackgroundPreview = '';
+      this.expoRemoveBackground = false;
+      this.expoSaveMessage = 'Saved.';
+    } catch (err) {
+      this.expoError = err instanceof AuthApiError ? err.message : 'Could not reach the server.';
+    } finally {
+      this.expoSaving = false;
     }
   }
 
@@ -564,6 +710,101 @@ export class AccountView extends LitElement {
     `;
   }
 
+  private renderExpoTab() {
+    if (expoStore.loading && !this.expoFormReady) {
+      return html`<div class="card"><p>Loading expo settings…</p></div>`;
+    }
+    const f = this.expoForm;
+    const currentBackground = expoStore.config?.background ?? '';
+    const previewSrc = this.expoBackgroundPreview || (!this.expoRemoveBackground ? currentBackground : '');
+
+    return html`
+      <div class="card">
+        <form @submit=${this.onSaveExpo}>
+          <div class="field checkbox-field">
+            <label class="checkbox-label">
+              <input
+                type="checkbox"
+                .checked=${f.isActive}
+                @change=${(e: Event) => this.setExpoField('isActive', (e.target as HTMLInputElement).checked)}
+              />
+              Expo Active
+            </label>
+            <p class="hint-text">
+              When off, the storefront homepage shows the fallback message below instead of the expo banner.
+            </p>
+          </div>
+          <div class="field">
+            <label>Eyebrow / Header</label>
+            <input
+              .value=${f.header}
+              @input=${(e: Event) => this.setExpoField('header', (e.target as HTMLInputElement).value)}
+              placeholder="Saree Expo"
+            />
+          </div>
+          <div class="field">
+            <label>Description</label>
+            <textarea
+              .value=${f.description}
+              @input=${(e: Event) => this.setExpoField('description', (e.target as HTMLTextAreaElement).value)}
+              placeholder="Handwoven sarees, curated for every occasion"
+            ></textarea>
+          </div>
+          <div class="field">
+            <label>Location</label>
+            <input
+              .value=${f.location}
+              @input=${(e: Event) => this.setExpoField('location', (e.target as HTMLInputElement).value)}
+              placeholder="Full address — used for the map link"
+            />
+          </div>
+          <div class="field">
+            <label>Background Image</label>
+            <div class="bg-picker">
+              ${previewSrc
+                ? html`<img class="bg-preview" src=${previewSrc} alt="" />`
+                : html`<div class="bg-preview"></div>`}
+              <div class="bg-actions">
+                <button type="button" class="ghost" @click=${() => this.expoBgInput?.click()}>Choose Image</button>
+                ${previewSrc
+                  ? html`<button type="button" class="ghost" @click=${() => this.onRemoveExpoBackground()}>
+                      Remove
+                    </button>`
+                  : nothing}
+              </div>
+              <input
+                id="expo-background-input"
+                type="file"
+                accept="image/*"
+                style="display:none"
+                @change=${(e: Event) => this.onExpoBackgroundSelected(e)}
+              />
+            </div>
+            <p class="hint-text">Falls back to the default storefront image when none is set.</p>
+          </div>
+          <div class="field">
+            <label>Fallback Message</label>
+            <textarea
+              .value=${f.fallbackMessage}
+              @input=${(e: Event) => this.setExpoField('fallbackMessage', (e.target as HTMLTextAreaElement).value)}
+              placeholder=${DEFAULT_FALLBACK_MESSAGE}
+            ></textarea>
+            <p class="hint-text">Shown on the storefront homepage while Expo Active is off.</p>
+          </div>
+          ${this.expoError ? html`<p class="error">${this.expoError}</p>` : nothing}
+          <button class="primary" type="submit" ?disabled=${this.expoSaving}>
+            ${this.expoSaving ? 'Saving…' : 'Save Expo Settings'}
+          </button>
+          ${this.expoSaveMessage ? html`<p class="sync-note">${this.expoSaveMessage}</p>` : nothing}
+        </form>
+      </div>
+    `;
+  }
+
+  private get expoBgInput() {
+    return this.renderRoot.querySelector<HTMLInputElement>('#expo-background-input');
+  }
+
   render() {
     const user = authStore.user;
 
@@ -573,9 +814,12 @@ export class AccountView extends LitElement {
       const showTabs = isAdmin || isPowerUser;
 
       const showInventory = showTabs && this.adminTab === 'inventory';
+      const showExpo = showTabs && this.adminTab === 'expo';
       let content = this.renderProfileCard(user);
       if (showInventory) {
         content = this.renderInventoryTab();
+      } else if (showExpo) {
+        content = this.renderExpoTab();
       } else if (isAdmin && this.adminTab === 'users') {
         content = this.renderUsersTab();
       }
@@ -605,6 +849,9 @@ export class AccountView extends LitElement {
                   @click=${() => this.openInventoryTab()}
                 >
                   Inventory
+                </button>
+                <button class=${this.adminTab === 'expo' ? 'active' : ''} @click=${() => this.openExpoTab()}>
+                  Expo
                 </button>
               </div>
             `

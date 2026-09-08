@@ -1,25 +1,26 @@
-import { LitElement, html, css } from 'lit';
-import { customElement, state } from 'lit/decorators.js';
+import { LitElement, html, css, nothing } from 'lit';
+import { customElement } from 'lit/decorators.js';
 import { catalogStore } from '../state/catalog-store';
+import { expoStore, DEFAULT_FALLBACK_MESSAGE } from '../state/expo-store';
 import { StoreController } from '../state/store-controller';
 import { sharedStyles } from '../styles/shared-styles';
 import '../components/category-chips';
 import '../components/product-grid';
 
-const EXPO_ADDRESS =
-  'No. 325, Bharathiyar Road, Maniyakarampalayam, Ganapathy, Coimbatore - 641006, Tamil Nadu';
-// Exact pin coordinates for the venue (confirmed via Google Maps), used
-// instead of a text-search so the link never depends on geocoding guesses.
-const EXPO_COORDS = '11.048024,76.975682';
+function mapUrl(location: string, embed: boolean): string {
+  const query = encodeURIComponent(location);
+  return embed
+    ? `https://www.google.com/maps?q=${query}&z=15&output=embed`
+    : `https://www.google.com/maps/search/?api=1&query=${query}`;
+}
 
 @customElement('home-view')
 export class HomeView extends LitElement {
-  @state() private logoLoaded = false;
-
   private logoObserver?: IntersectionObserver;
 
-  // retains a StoreController subscription to re-render on store changes
+  // retains StoreController subscriptions to re-render on store changes
   catalog = new StoreController(this, catalogStore);
+  expo = new StoreController(this, expoStore);
 
   static styles = [
     sharedStyles,
@@ -30,26 +31,11 @@ export class HomeView extends LitElement {
         display: block;
         border-radius: var(--radius-sm);
         margin-bottom: 16px;
-        opacity: 0;
-      }
-      .brand-logo.loaded {
-        animation: logo-in 0.7s ease-out both;
-      }
-      @keyframes logo-in {
-        from {
-          opacity: 0;
-          transform: translateY(-16px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
       }
       .hero {
         border-radius: var(--radius);
-        background:
-          linear-gradient(135deg, rgba(42, 13, 23, 0.18), rgba(122, 16, 48, 0.12)),
-          url('/shop.jpg') center 30% / cover;
+        background-size: cover;
+        background-position: center 30%;
         color: var(--text);
         padding: 22px 18px;
         margin-bottom: 18px;
@@ -113,22 +99,34 @@ export class HomeView extends LitElement {
         text-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
       }
       .hero h1 {
-        font-size: 10.5px;
+        font-size: 13px;
         font-weight: 700;
         line-height: 1.5;
-        margin: 0 0 10px;
+        margin: 0 0 6px;
         max-width: 44ch;
         opacity: 1;
         text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
       }
-      .hero button {
-        font: 700 13px var(--sans);
-        background: var(--text);
-        color: var(--accent-strong);
-        border: none;
-        border-radius: 20px;
-        padding: 9px 16px;
-        cursor: pointer;
+      .expo-fallback {
+        border-radius: var(--radius);
+        border: 1px solid var(--accent);
+        background: rgba(232, 121, 154, 0.12);
+        color: var(--text);
+        padding: 14px 16px;
+        margin: 0 0 18px;
+        text-align: center;
+        font-size: 12.5px;
+        font-weight: 600;
+        line-height: 1.5;
+      }
+      .hero-location {
+        font-size: 10.5px;
+        font-weight: 600;
+        line-height: 1.5;
+        margin: 0 0 10px;
+        max-width: 44ch;
+        opacity: 0.9;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
       }
       section {
         margin-bottom: 26px;
@@ -178,6 +176,7 @@ export class HomeView extends LitElement {
   connectedCallback() {
     super.connectedCallback();
     catalogStore.load();
+    expoStore.load();
   }
 
   firstUpdated() {
@@ -209,38 +208,54 @@ export class HomeView extends LitElement {
     const newArrivals = products.filter((p) => p.badge === 'New').slice(0, 4);
     const trending = products;
 
+    const expo = expoStore.config;
+    const expoActive = !!expo?.isActive;
+    const heroStyle = expoActive
+      ? `background-image: linear-gradient(135deg, rgba(42, 13, 23, 0.18), rgba(122, 16, 48, 0.12)), url('${expo?.background || '/shop.jpg'}')`
+      : '';
+
     return html`
       <img
-        class="brand-logo ${this.logoLoaded ? 'loaded' : ''}"
+        class="brand-logo"
         src="/logo.jpg"
         alt="RAGA Boutique"
-        @load=${() => (this.logoLoaded = true)}
+        width="1100"
+        height="378"
+        fetchpriority="high"
+        decoding="async"
       />
 
-      <div class="hero">
-        <div class="hero-text">
-          <p class="eyebrow">Saree Expo</p>
-          <!--<h1>Handwoven sarees, curated for every occasion</h1>-->
-          <h1>Visit us at ${EXPO_ADDRESS}</h1>
-          <!--<button @click=${() => this.go('#/shop')}>Shop the collection</button>-->
-        </div>
-        <a
-          class="map-link"
-          href=${`https://www.google.com/maps/search/?api=1&query=${EXPO_COORDS}`}
-          target="_blank"
-          rel="noopener"
-          aria-label="Open in Google Maps"
-        >
-          <iframe
-            class="map-embed"
-            src=${`https://www.google.com/maps?q=${EXPO_COORDS}&z=15&output=embed`}
-            loading="lazy"
-            title="Saree Expo location"
-            tabindex="-1"
-          ></iframe>
-          <span>Google Maps</span>
-        </a>
-      </div>
+      ${expoActive
+        ? html`
+            <div class="hero" style=${heroStyle}>
+              <div class="hero-text">
+                <p class="eyebrow">${expo?.header || 'Saree Expo'}</p>
+                ${expo?.description ? html`<h1>${expo.description}</h1>` : nothing}
+                ${expo?.location ? html`<p class="hero-location">Visit us at ${expo.location}</p>` : nothing}
+              </div>
+              ${expo?.location
+                ? html`
+                    <a
+                      class="map-link"
+                      href=${mapUrl(expo.location, false)}
+                      target="_blank"
+                      rel="noopener"
+                      aria-label="Open in Google Maps"
+                    >
+                      <iframe
+                        class="map-embed"
+                        src=${mapUrl(expo.location, true)}
+                        loading="lazy"
+                        title="Saree Expo location"
+                        tabindex="-1"
+                      ></iframe>
+                      <span>Google Maps</span>
+                    </a>
+                  `
+                : nothing}
+            </div>
+          `
+        : html`<p class="expo-fallback">${expo?.fallbackMessage || DEFAULT_FALLBACK_MESSAGE}</p>`}
 
       <category-chips
         .categories=${catalogStore.categories}

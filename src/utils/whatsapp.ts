@@ -21,3 +21,26 @@ export function whatsappOrderLink(
   const text = encodeURIComponent(lines.join('\n'));
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${text}`;
 }
+
+export interface CartOrderItem {
+  name: string;
+  productCode?: string | null;
+  price: number;
+  quantity: number;
+}
+
+export function whatsappCartOrderLink(items: CartOrderItem[], total: number): string {
+  const lines = [
+    "Hi, I'd like to order these sarees from RAGA Boutique:",
+    '',
+    ...items.map((item) => {
+      const code = item.productCode ? ` (${item.productCode})` : '';
+      const lineTotal = (item.price * item.quantity).toLocaleString('en-IN');
+      return `• ${item.name}${code} x${item.quantity} — ₹${lineTotal}`;
+    }),
+    '',
+    `Total: ₹${total.toLocaleString('en-IN')}`,
+  ];
+  const text = encodeURIComponent(lines.join('\n'));
+  return `https://wa.me/${WHATSAPP_NUMBER}?text=${text}`;
+}

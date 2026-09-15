@@ -2,6 +2,7 @@ import { LitElement, html, css, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import type { Product } from '../data/products';
 import { wishlistStore } from '../state/wishlist-store';
+import { cartStore } from '../state/cart-store';
 import { StoreController } from '../state/store-controller';
 import { hexToRgb, mixWithWhite } from '../utils/color';
 import { patternForSeed } from './saree-swatch';
@@ -208,9 +209,13 @@ export class ProductCard extends LitElement {
       font-weight: 700;
       color: var(--good);
     }
-    .buy-now {
-      width: 100%;
+    .actions {
+      display: flex;
+      gap: 6px;
       margin-top: auto;
+    }
+    .buy-now {
+      flex: 1;
       font: 700 12.5px var(--sans);
       background: var(--accent);
       color: var(--accent-contrast);
@@ -222,6 +227,20 @@ export class ProductCard extends LitElement {
     .buy-now:disabled {
       background: var(--bg-sunken);
       color: var(--text-faint);
+      cursor: not-allowed;
+    }
+    .cart-add {
+      flex: none;
+      width: 36px;
+      font-size: 15px;
+      background: var(--bg-sunken);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+    }
+    .cart-add:disabled {
+      opacity: 0.5;
       cursor: not-allowed;
     }
   `;
@@ -238,6 +257,11 @@ export class ProductCard extends LitElement {
   private buyNow(e: Event) {
     e.stopPropagation();
     location.hash = `#/checkout/${this.product.id}`;
+  }
+
+  private addToCart(e: Event) {
+    e.stopPropagation();
+    cartStore.add(this.product.id);
   }
 
   render() {
@@ -299,9 +323,19 @@ export class ProductCard extends LitElement {
                 `
               : nothing}
           </div>
-          <button class="buy-now" ?disabled=${p.soldOut} @click=${this.buyNow}>
-            ${p.soldOut ? 'Sold Out' : 'Buy Now'}
-          </button>
+          <div class="actions">
+            <button
+              class="cart-add"
+              ?disabled=${p.soldOut}
+              aria-label="Add to cart"
+              @click=${this.addToCart}
+            >
+              🛒
+            </button>
+            <button class="buy-now" ?disabled=${p.soldOut} @click=${this.buyNow}>
+              ${p.soldOut ? 'Sold Out' : 'Buy Now'}
+            </button>
+          </div>
         </div>
       </div>
     `;

@@ -4,6 +4,7 @@ import { catalogStore } from '../state/catalog-store';
 import type { Product } from '../data/products';
 import { sharedStyles } from '../styles/shared-styles';
 import { wishlistStore } from '../state/wishlist-store';
+import { cartStore } from '../state/cart-store';
 import { StoreController } from '../state/store-controller';
 import { patternForSeed } from '../components/saree-swatch';
 import { hexToRgb, mixWithWhite } from '../utils/color';
@@ -18,6 +19,7 @@ export class ProductDetailView extends LitElement {
   @state() private colorIndex = 0;
   @state() private photoIndex = 0;
   @state() private lightboxOpen = false;
+  @state() private justAddedToCart = false;
 
   private touchActive = false;
   private touchStartX = 0;
@@ -308,7 +310,8 @@ export class ProductDetailView extends LitElement {
         color: var(--text-faint);
         cursor: not-allowed;
       }
-      .wish-btn {
+      .wish-btn,
+      .cart-btn {
         width: 100%;
         height: 46px;
         border-radius: var(--radius-sm);
@@ -317,6 +320,14 @@ export class ProductDetailView extends LitElement {
         color: var(--text);
         font: 700 14px var(--sans);
         cursor: pointer;
+      }
+      .cart-btn.added {
+        color: var(--good);
+        border-color: var(--good);
+      }
+      .cart-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
       }
       .wish-btn.active {
         color: var(--accent);
@@ -467,6 +478,14 @@ export class ProductDetailView extends LitElement {
     `;
   }
 
+  private addToCart(productId: string) {
+    cartStore.add(productId);
+    this.justAddedToCart = true;
+    setTimeout(() => {
+      this.justAddedToCart = false;
+    }, 1500);
+  }
+
   render() {
     const product = catalogStore.products.find((p) => p.id === this.productId);
     if (!product) {
@@ -544,6 +563,13 @@ export class ProductDetailView extends LitElement {
           @click=${() => (location.hash = `#/checkout/${product.id}`)}
         >
           ${product.soldOut ? 'Sold Out' : 'Buy Now'}
+        </button>
+        <button
+          class="cart-btn ${this.justAddedToCart ? 'added' : ''}"
+          ?disabled=${product.soldOut}
+          @click=${() => this.addToCart(product.id)}
+        >
+          ${this.justAddedToCart ? '✓ Added to Cart' : '🛒 Add to Cart'}
         </button>
         <button
           class="wish-btn ${wished ? 'active' : ''}"

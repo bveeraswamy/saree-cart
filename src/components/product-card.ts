@@ -2,7 +2,7 @@ import { LitElement, html, css, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import type { Product } from '../data/products';
 import { wishlistStore } from '../state/wishlist-store';
-import { cartStore } from '../state/cart-store';
+import { cartStore, cartKey } from '../state/cart-store';
 import { StoreController } from '../state/store-controller';
 import { hexToRgb, mixWithWhite } from '../utils/color';
 import { patternForSeed } from './saree-swatch';
@@ -261,7 +261,7 @@ export class ProductCard extends LitElement {
 
   private addToCart(e: Event) {
     e.stopPropagation();
-    cartStore.add(this.product.id);
+    cartStore.add(cartKey(this.product));
   }
 
   render() {

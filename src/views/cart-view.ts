@@ -1,7 +1,7 @@
 import { LitElement, html, css } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { catalogStore } from '../state/catalog-store';
-import { cartStore } from '../state/cart-store';
+import { cartStore, cartKey } from '../state/cart-store';
 import { StoreController } from '../state/store-controller';
 import { sharedStyles } from '../styles/shared-styles';
 import { whatsappCartOrderLink } from '../utils/whatsapp';
@@ -135,13 +135,13 @@ export class CartView extends LitElement {
     `,
   ];
 
-  private updateQuantity(productId: string, delta: number) {
-    cartStore.add(productId, delta);
+  private updateQuantity(productCode: string, delta: number) {
+    cartStore.add(productCode, delta);
   }
 
   render() {
     const lines = cartStore.lines
-      .map((line) => ({ line, product: catalogStore.products.find((p) => p.id === line.productId) }))
+      .map((line) => ({ line, product: catalogStore.products.find((p) => cartKey(p) === line.productCode) }))
       .filter((entry) => !!entry.product);
 
     if (!lines.length) {
@@ -172,14 +172,14 @@ export class CartView extends LitElement {
                   <div class="stepper">
                     <button
                       aria-label="Decrease quantity"
-                      @click=${() => this.updateQuantity(line.productId, -1)}
+                      @click=${() => this.updateQuantity(line.productCode, -1)}
                     >
                       −
                     </button>
                     <span>${line.quantity}</span>
                     <button
                       aria-label="Increase quantity"
-                      @click=${() => this.updateQuantity(line.productId, 1)}
+                      @click=${() => this.updateQuantity(line.productCode, 1)}
                     >
                       +
                     </button>
@@ -187,7 +187,7 @@ export class CartView extends LitElement {
                   <button
                     class="remove"
                     aria-label="Remove ${product!.name}"
-                    @click=${() => cartStore.remove(line.productId)}
+                    @click=${() => cartStore.remove(line.productCode)}
                   >
                     ✕
                   </button>

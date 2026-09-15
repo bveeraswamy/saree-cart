@@ -4,7 +4,7 @@ import { catalogStore } from '../state/catalog-store';
 import type { Product } from '../data/products';
 import { sharedStyles } from '../styles/shared-styles';
 import { wishlistStore } from '../state/wishlist-store';
-import { cartStore } from '../state/cart-store';
+import { cartStore, cartKey } from '../state/cart-store';
 import { StoreController } from '../state/store-controller';
 import { patternForSeed } from '../components/saree-swatch';
 import { hexToRgb, mixWithWhite } from '../utils/color';
@@ -478,8 +478,8 @@ export class ProductDetailView extends LitElement {
     `;
   }
 
-  private addToCart(productId: string) {
-    cartStore.add(productId);
+  private addToCart(product: Product) {
+    cartStore.add(cartKey(product));
     this.justAddedToCart = true;
     setTimeout(() => {
       this.justAddedToCart = false;
@@ -567,7 +567,7 @@ export class ProductDetailView extends LitElement {
         <button
           class="cart-btn ${this.justAddedToCart ? 'added' : ''}"
           ?disabled=${product.soldOut}
-          @click=${() => this.addToCart(product.id)}
+          @click=${() => this.addToCart(product)}
         >
           ${this.justAddedToCart ? '✓ Added to Cart' : '🛒 Add to Cart'}
         </button>

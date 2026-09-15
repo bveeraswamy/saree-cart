@@ -65,30 +65,6 @@ export class CartView extends LitElement {
         align-items: center;
         justify-content: space-between;
       }
-      .stepper {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        border: 1px solid var(--border);
-        border-radius: 20px;
-        padding: 2px 4px;
-      }
-      .stepper button {
-        width: 24px;
-        height: 24px;
-        border-radius: 50%;
-        border: none;
-        background: var(--bg-sunken);
-        color: var(--text);
-        font: 700 14px var(--sans);
-        cursor: pointer;
-        line-height: 1;
-      }
-      .stepper span {
-        font: 700 13px var(--sans);
-        min-width: 16px;
-        text-align: center;
-      }
       .remove {
         background: none;
         border: none;
@@ -135,10 +111,6 @@ export class CartView extends LitElement {
     `,
   ];
 
-  private updateQuantity(productCode: string, delta: number) {
-    cartStore.add(productCode, delta);
-  }
-
   render() {
     const lines = cartStore.lines
       .map((line) => ({ line, product: catalogStore.products.find((p) => cartKey(p) === line.productCode) }))
@@ -169,21 +141,6 @@ export class CartView extends LitElement {
                 <p class="sub">${product!.productCode ? `${product!.productCode} · ` : ''}${product!.fabric}</p>
                 <div class="line-bottom">
                   <span class="price">₹${(product!.price * line.quantity).toLocaleString('en-IN')}</span>
-                  <div class="stepper">
-                    <button
-                      aria-label="Decrease quantity"
-                      @click=${() => this.updateQuantity(line.productCode, -1)}
-                    >
-                      −
-                    </button>
-                    <span>${line.quantity}</span>
-                    <button
-                      aria-label="Increase quantity"
-                      @click=${() => this.updateQuantity(line.productCode, 1)}
-                    >
-                      +
-                    </button>
-                  </div>
                   <button
                     class="remove"
                     aria-label="Remove ${product!.name}"

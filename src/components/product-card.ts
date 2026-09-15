@@ -15,6 +15,8 @@ export class ProductCard extends LitElement {
 
   // retains a StoreController subscription to re-render on store changes
   wishlist = new StoreController(this, wishlistStore);
+  // retains a StoreController subscription to re-render on store changes
+  cart = new StoreController(this, cartStore);
 
   static styles = css`
     :host {
@@ -243,6 +245,11 @@ export class ProductCard extends LitElement {
       opacity: 0.5;
       cursor: not-allowed;
     }
+    .cart-add.in-cart {
+      background: var(--good);
+      color: #0b2015;
+      border-color: var(--good);
+    }
   `;
 
   private toggleWishlist(e: Event) {
@@ -268,6 +275,7 @@ export class ProductCard extends LitElement {
     const p = this.product;
     const off = p.mrp ? Math.round(((p.mrp - p.price) / p.mrp) * 100) : null;
     const active = wishlistStore.has(p.id);
+    const inCart = cartStore.has(cartKey(p));
     const sheenRgb = mixWithWhite(hexToRgb(p.containerColor), 0.65);
     const pattern = patternForSeed(p.id);
     return html`
@@ -325,12 +333,12 @@ export class ProductCard extends LitElement {
           </div>
           <div class="actions">
             <button
-              class="cart-add"
+              class="cart-add ${inCart ? 'in-cart' : ''}"
               ?disabled=${p.soldOut}
-              aria-label="Add to cart"
+              aria-label=${inCart ? 'Already in cart' : 'Add to cart'}
               @click=${this.addToCart}
             >
-              🛒
+              ${inCart ? '✓' : '🛒'}
             </button>
             <button class="buy-now" ?disabled=${p.soldOut} @click=${this.buyNow}>
               ${p.soldOut ? 'Sold Out' : 'Buy Now'}

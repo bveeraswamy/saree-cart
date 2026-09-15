@@ -19,7 +19,6 @@ export class ProductDetailView extends LitElement {
   @state() private colorIndex = 0;
   @state() private photoIndex = 0;
   @state() private lightboxOpen = false;
-  @state() private justAddedToCart = false;
 
   private touchActive = false;
   private touchStartX = 0;
@@ -27,6 +26,8 @@ export class ProductDetailView extends LitElement {
 
   // retains a StoreController subscription to re-render on store changes
   wishlist = new StoreController(this, wishlistStore);
+  // retains a StoreController subscription to re-render on store changes
+  cart = new StoreController(this, cartStore);
   // retains a StoreController subscription to re-render on store changes
   catalog = new StoreController(this, catalogStore);
 
@@ -480,10 +481,6 @@ export class ProductDetailView extends LitElement {
 
   private addToCart(product: Product) {
     cartStore.add(cartKey(product));
-    this.justAddedToCart = true;
-    setTimeout(() => {
-      this.justAddedToCart = false;
-    }, 1500);
   }
 
   render() {
@@ -497,6 +494,7 @@ export class ProductDetailView extends LitElement {
     const color = product.colors[this.colorIndex] ?? product.colors[0];
     const off = product.mrp ? Math.round(((product.mrp - product.price) / product.mrp) * 100) : null;
     const wished = wishlistStore.has(product.id);
+    const inCart = cartStore.has(cartKey(product));
     const related = catalogStore.products
       .filter((p) => p.category === product.category && p.id !== product.id)
       .slice(0, 4);
@@ -565,11 +563,11 @@ export class ProductDetailView extends LitElement {
           ${product.soldOut ? 'Sold Out' : 'Buy Now'}
         </button>
         <button
-          class="cart-btn ${this.justAddedToCart ? 'added' : ''}"
+          class="cart-btn ${inCart ? 'added' : ''}"
           ?disabled=${product.soldOut}
           @click=${() => this.addToCart(product)}
         >
-          ${this.justAddedToCart ? '✓ Added to Cart' : '🛒 Add to Cart'}
+          ${inCart ? '✓ In Cart' : '🛒 Add to Cart'}
         </button>
         <button
           class="wish-btn ${wished ? 'active' : ''}"

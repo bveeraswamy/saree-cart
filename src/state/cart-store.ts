@@ -9,6 +9,12 @@ export interface CartLine {
   quantity: number;
 }
 
+// Each product code currently represents one physical, one-of-a-kind
+// saree — not a stock count — so a customer can only ever have exactly
+// one of it in the cart. Raising this (once the catalog supports several
+// identical sarees under one code) is meant to be exactly this one line.
+const MAX_QUANTITY_PER_PRODUCT = 1;
+
 // Cart lines are keyed by product code, not database id — the backend
 // already enforces unique codes for every real product, so this is the
 // stable, human-meaningful identity for "the same saree", and guarantees
@@ -50,17 +56,21 @@ class CartStore extends EventTarget {
     return this.items.has(productCode);
   }
 
-  // Adds `delta` (default 1) units of a product, clamping at 0 (never goes
-  // negative — use setQuantity(code, 0) or remove() to clear a line outright).
+  // Adds `delta` (default 1) units of a product, clamped to
+  // [0, MAX_QUANTITY_PER_PRODUCT] — so with today's one-of-a-kind-per-code
+  // catalog, calling this again once a product is already in the cart is a
+  // harmless no-op rather than piling up a quantity that could never
+  // actually be fulfilled.
   add(productCode: string, delta = 1) {
     this.setQuantity(productCode, (this.items.get(productCode) ?? 0) + delta);
   }
 
   setQuantity(productCode: string, quantity: number) {
-    if (quantity <= 0) {
+    const clamped = Math.min(quantity, MAX_QUANTITY_PER_PRODUCT);
+    if (clamped <= 0) {
       this.items.delete(productCode);
     } else {
-      this.items.set(productCode, quantity);
+      this.items.set(productCode, clamped);
     }
     this.persist();
   }

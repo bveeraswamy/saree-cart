@@ -1,6 +1,7 @@
 import { LitElement, html, css } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { catalogStore } from './state/catalog-store';
+import { cartStore, cartKey } from './state/cart-store';
 import { StoreController } from './state/store-controller';
 
 import './components/top-bar';
@@ -102,6 +103,16 @@ export class AppShell extends LitElement {
   connectedCallback() {
     super.connectedCallback();
     window.addEventListener('hashchange', this.onHashChange);
+    // Drops any cart line that no longer resolves to a real product (see
+    // cart-store.ts) as soon as the real catalog is available, regardless
+    // of which page the user lands on first. Skipped if the catalog came
+    // back empty (load failed with no fallback, most likely) — an outage
+    // shouldn't be able to wipe out someone's cart.
+    catalogStore.load().then(() => {
+      if (catalogStore.products.length) {
+        cartStore.reconcile(catalogStore.products.map(cartKey));
+      }
+    });
   }
 
   disconnectedCallback() {

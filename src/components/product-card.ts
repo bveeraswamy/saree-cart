@@ -1,7 +1,6 @@
 import { LitElement, html, css, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import type { Product } from '../data/products';
-import { wishlistStore } from '../state/wishlist-store';
 import { cartStore, cartKey } from '../state/cart-store';
 import { StoreController } from '../state/store-controller';
 import { hexToRgb, mixWithWhite } from '../utils/color';
@@ -13,8 +12,6 @@ import './rating-stars';
 export class ProductCard extends LitElement {
   @property({ attribute: false }) product!: Product;
 
-  // retains a StoreController subscription to re-render on store changes
-  wishlist = new StoreController(this, wishlistStore);
   // retains a StoreController subscription to re-render on store changes
   cart = new StoreController(this, cartStore);
 
@@ -94,25 +91,6 @@ export class ProductCard extends LitElement {
       letter-spacing: 0.04em;
       color: rgba(0, 0, 0, 0.72);
       text-shadow: 0 1px 0 rgba(255, 255, 255, 0.25);
-    }
-    .wish {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.85);
-      border: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 15px;
-      cursor: pointer;
-      z-index: 1;
-    }
-    .wish.active {
-      color: var(--accent);
     }
     .badge-tag {
       position: absolute;
@@ -252,11 +230,6 @@ export class ProductCard extends LitElement {
     }
   `;
 
-  private toggleWishlist(e: Event) {
-    e.stopPropagation();
-    wishlistStore.toggle(this.product.id);
-  }
-
   private go() {
     location.hash = `#/product/${this.product.id}`;
   }
@@ -274,7 +247,6 @@ export class ProductCard extends LitElement {
   render() {
     const p = this.product;
     const off = p.mrp ? Math.round(((p.mrp - p.price) / p.mrp) * 100) : null;
-    const active = wishlistStore.has(p.id);
     const inCart = cartStore.has(cartKey(p));
     const sheenRgb = mixWithWhite(hexToRgb(p.containerColor), 0.65);
     const pattern = patternForSeed(p.id);
@@ -286,13 +258,6 @@ export class ProductCard extends LitElement {
             : p.badge
               ? html`<span class="badge-tag badge-${p.badge.toLowerCase()}">${p.badge}</span>`
               : ''}
-          <button
-            class="wish ${active ? 'active' : ''}"
-            aria-label="Toggle wishlist"
-            @click=${this.toggleWishlist}
-          >
-            ${active ? '♥' : '♡'}
-          </button>
           ${p.image
             ? html`
                 <saree-swatch

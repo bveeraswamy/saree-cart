@@ -2,7 +2,6 @@ import { LitElement, html, css, nothing } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { catalogStore } from '../state/catalog-store';
 import { expoStore, DEFAULT_FALLBACK_MESSAGE } from '../state/expo-store';
-import { cartStore } from '../state/cart-store';
 import { StoreController } from '../state/store-controller';
 import { sharedStyles } from '../styles/shared-styles';
 import '../components/category-chips';
@@ -22,7 +21,6 @@ export class HomeView extends LitElement {
   // retains StoreController subscriptions to re-render on store changes
   catalog = new StoreController(this, catalogStore);
   expo = new StoreController(this, expoStore);
-  cart = new StoreController(this, cartStore);
 
   static styles = [
     sharedStyles,
@@ -129,46 +127,6 @@ export class HomeView extends LitElement {
         max-width: 44ch;
         opacity: 0.9;
         text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
-      }
-      .chips-row {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-      category-chips {
-        flex: 1;
-        min-width: 0;
-      }
-      .cart-btn {
-        position: relative;
-        flex: none;
-        width: 36px;
-        height: 36px;
-        margin-bottom: 10px;
-        border-radius: 50%;
-        border: 1px solid var(--border);
-        background: var(--bg-elevated);
-        color: var(--text);
-        font-size: 16px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-      }
-      .cart-btn .count {
-        position: absolute;
-        top: -3px;
-        right: -3px;
-        background: var(--accent);
-        color: var(--accent-contrast);
-        font: 700 9px var(--sans);
-        min-width: 14px;
-        height: 14px;
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 0 3px;
       }
       section {
         margin-bottom: 26px;
@@ -299,16 +257,10 @@ export class HomeView extends LitElement {
           `
         : html`<p class="expo-fallback">${expo?.fallbackMessage || DEFAULT_FALLBACK_MESSAGE}</p>`}
 
-      <div class="chips-row">
-        <category-chips
-          .categories=${catalogStore.categories}
-          @select=${(e: CustomEvent) => this.go(`#/shop/${encodeURIComponent(e.detail)}`)}
-        ></category-chips>
-        <button class="cart-btn" aria-label="Cart" @click=${() => this.go('#/cart')}>
-          ${cartStore.count ? html`<span class="count">${cartStore.count}</span>` : nothing}
-          🛍️
-        </button>
-      </div>
+      <category-chips
+        .categories=${catalogStore.categories}
+        @select=${(e: CustomEvent) => this.go(`#/shop/${encodeURIComponent(e.detail)}`)}
+      ></category-chips>
 
       ${bestsellers.length
         ? html`

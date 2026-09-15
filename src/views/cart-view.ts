@@ -114,7 +114,6 @@ export class CartView extends LitElement {
       }
       .summary {
         margin-top: 8px;
-        border-top: 1px solid var(--border);
         padding-top: 12px;
       }
       .row {

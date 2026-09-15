@@ -1,7 +1,5 @@
 import { LitElement, html, css, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { cartStore } from '../state/cart-store';
-import { StoreController } from '../state/store-controller';
 
 @customElement('top-bar')
 export class TopBar extends LitElement {
@@ -10,9 +8,6 @@ export class TopBar extends LitElement {
   @property({ type: Boolean }) showSearch = false;
   @property() query = '';
   @property({ type: Boolean }) brandVisible = true;
-
-  // retains a StoreController subscription to re-render on store changes
-  cart = new StoreController(this, cartStore);
 
   static styles = css`
     :host {
@@ -65,22 +60,6 @@ export class TopBar extends LitElement {
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      position: relative;
-    }
-    .icon-btn .count {
-      position: absolute;
-      top: 2px;
-      right: 2px;
-      background: var(--accent);
-      color: var(--accent-contrast);
-      font: 700 9px var(--sans);
-      min-width: 14px;
-      height: 14px;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0 3px;
     }
     .brand {
       font: 800 18px var(--sans);
@@ -147,12 +126,7 @@ export class TopBar extends LitElement {
               ? html`<span class="label">${this.label}</span>`
               : html`<span class="brand">RAGA Boutique</span>`}
         </div>
-        <div class="side">
-          <button class="icon-btn" @click=${() => (location.hash = '#/cart')} aria-label="Cart">
-            ${cartStore.count ? html`<span class="count">${cartStore.count}</span>` : nothing}
-            🛍️
-          </button>
-        </div>
+        <div class="side"></div>
       </div>
     `;
   }

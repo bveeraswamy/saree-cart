@@ -3,7 +3,6 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { catalogStore } from '../state/catalog-store';
 import type { Product } from '../data/products';
 import { sharedStyles } from '../styles/shared-styles';
-import { wishlistStore } from '../state/wishlist-store';
 import { cartStore, cartKey } from '../state/cart-store';
 import { StoreController } from '../state/store-controller';
 import { patternForSeed } from '../components/saree-swatch';
@@ -24,8 +23,6 @@ export class ProductDetailView extends LitElement {
   private touchStartX = 0;
   private touchStartY = 0;
 
-  // retains a StoreController subscription to re-render on store changes
-  wishlist = new StoreController(this, wishlistStore);
   // retains a StoreController subscription to re-render on store changes
   cart = new StoreController(this, cartStore);
   // retains a StoreController subscription to re-render on store changes
@@ -311,7 +308,6 @@ export class ProductDetailView extends LitElement {
         color: var(--text-faint);
         cursor: not-allowed;
       }
-      .wish-btn,
       .cart-btn {
         width: 100%;
         height: 46px;
@@ -329,10 +325,6 @@ export class ProductDetailView extends LitElement {
       .cart-btn:disabled {
         opacity: 0.5;
         cursor: not-allowed;
-      }
-      .wish-btn.active {
-        color: var(--accent);
-        border-color: var(--accent);
       }
       h3.block-title {
         font-size: 13px;
@@ -493,7 +485,6 @@ export class ProductDetailView extends LitElement {
     }
     const color = product.colors[this.colorIndex] ?? product.colors[0];
     const off = product.mrp ? Math.round(((product.mrp - product.price) / product.mrp) * 100) : null;
-    const wished = wishlistStore.has(product.id);
     const inCart = cartStore.has(cartKey(product));
     const related = catalogStore.products
       .filter((p) => p.category === product.category && p.id !== product.id)
@@ -568,13 +559,6 @@ export class ProductDetailView extends LitElement {
           @click=${() => this.addToCart(product)}
         >
           ${inCart ? '✓ In Cart' : '🛒 Add to Cart'}
-        </button>
-        <button
-          class="wish-btn ${wished ? 'active' : ''}"
-          aria-label="Toggle wishlist"
-          @click=${() => wishlistStore.toggle(product.id)}
-        >
-          ${wished ? '♥' : '♡'} ${wished ? 'Saved to Wishlist' : 'Add to Wishlist'}
         </button>
       </div>
 

@@ -80,24 +80,6 @@ class CartStore extends EventTarget {
     this.persist();
   }
 
-  // Drops any line whose code isn't in the current catalog — a product
-  // deleted/delisted since it was added, or (one-time) a cart saved under
-  // the old id-keyed scheme before this store switched to codes. Without
-  // this, `count` keeps summing quantities that can never resolve to a
-  // real product, so the badge shows a number the cart page can't back up.
-  // Called once the real catalog has loaded (see app-shell.ts).
-  reconcile(validCodes: Iterable<string>) {
-    const valid = new Set(validCodes);
-    let changed = false;
-    for (const code of this.items.keys()) {
-      if (!valid.has(code)) {
-        this.items.delete(code);
-        changed = true;
-      }
-    }
-    if (changed) this.persist();
-  }
-
   clear() {
     this.items.clear();
     this.persist();

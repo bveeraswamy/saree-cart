@@ -1,6 +1,7 @@
-import { LitElement, html, css } from 'lit';
+import { LitElement, html, css, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { catalogStore } from '../state/catalog-store';
+import { cartStore } from '../state/cart-store';
 import { StoreController } from '../state/store-controller';
 import { sharedStyles } from '../styles/shared-styles';
 import '../components/category-chips';
@@ -15,8 +16,9 @@ export class ShopView extends LitElement {
 
   @state() private sort: Sort = 'popularity';
 
-  // retains a StoreController subscription to re-render on store changes
+  // retains StoreController subscriptions to re-render on store changes
   catalog = new StoreController(this, catalogStore);
+  cart = new StoreController(this, cartStore);
 
   connectedCallback() {
     super.connectedCallback();
@@ -37,6 +39,46 @@ export class ShopView extends LitElement {
         font-size: 12.5px;
         color: var(--text-faint);
         margin: 0 0 12px;
+      }
+      .chips-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      category-chips {
+        flex: 1;
+        min-width: 0;
+      }
+      .cart-btn {
+        position: relative;
+        flex: none;
+        width: 36px;
+        height: 36px;
+        margin-bottom: 10px;
+        border-radius: 50%;
+        border: 1px solid var(--border);
+        background: var(--bg-elevated);
+        color: var(--text);
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+      }
+      .cart-btn .count {
+        position: absolute;
+        top: -3px;
+        right: -3px;
+        background: var(--accent);
+        color: var(--accent-contrast);
+        font: 700 9px var(--sans);
+        min-width: 14px;
+        height: 14px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 3px;
       }
       .toolbar {
         display: flex;
@@ -103,11 +145,17 @@ export class ShopView extends LitElement {
         <p class="count">${results.length} saree${results.length === 1 ? '' : 's'}</p>
       </div>
 
-      <category-chips
-        .active=${this.categoryId}
-        .categories=${catalogStore.categories}
-        @select=${(e: CustomEvent) => this.setCategory(e.detail)}
-      ></category-chips>
+      <div class="chips-row">
+        <category-chips
+          .active=${this.categoryId}
+          .categories=${catalogStore.categories}
+          @select=${(e: CustomEvent) => this.setCategory(e.detail)}
+        ></category-chips>
+        <button class="cart-btn" aria-label="Cart" @click=${() => (location.hash = '#/cart')}>
+          ${cartStore.count ? html`<span class="count">${cartStore.count}</span>` : nothing}
+          🛍️
+        </button>
+      </div>
 
       <div class="toolbar">
         <select

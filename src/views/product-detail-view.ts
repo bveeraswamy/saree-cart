@@ -3,7 +3,7 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { catalogStore } from '../state/catalog-store';
 import type { Product } from '../data/products';
 import { sharedStyles } from '../styles/shared-styles';
-import { wishlistStore } from '../state/wishlist-store';
+import { cartStore, cartKey } from '../state/cart-store';
 import { StoreController } from '../state/store-controller';
 import { patternForSeed } from '../components/saree-swatch';
 import { hexToRgb, mixWithWhite } from '../utils/color';
@@ -24,7 +24,7 @@ export class ProductDetailView extends LitElement {
   private touchStartY = 0;
 
   // retains a StoreController subscription to re-render on store changes
-  wishlist = new StoreController(this, wishlistStore);
+  cart = new StoreController(this, cartStore);
   // retains a StoreController subscription to re-render on store changes
   catalog = new StoreController(this, catalogStore);
 
@@ -308,7 +308,7 @@ export class ProductDetailView extends LitElement {
         color: var(--text-faint);
         cursor: not-allowed;
       }
-      .wish-btn {
+      .cart-btn {
         width: 100%;
         height: 46px;
         border-radius: var(--radius-sm);
@@ -318,9 +318,13 @@ export class ProductDetailView extends LitElement {
         font: 700 14px var(--sans);
         cursor: pointer;
       }
-      .wish-btn.active {
-        color: var(--accent);
-        border-color: var(--accent);
+      .cart-btn.added {
+        color: var(--good);
+        border-color: var(--good);
+      }
+      .cart-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
       }
       h3.block-title {
         font-size: 13px;
@@ -467,6 +471,10 @@ export class ProductDetailView extends LitElement {
     `;
   }
 
+  private addToCart(product: Product) {
+    cartStore.add(cartKey(product));
+  }
+
   render() {
     const product = catalogStore.products.find((p) => p.id === this.productId);
     if (!product) {
@@ -477,7 +485,7 @@ export class ProductDetailView extends LitElement {
     }
     const color = product.colors[this.colorIndex] ?? product.colors[0];
     const off = product.mrp ? Math.round(((product.mrp - product.price) / product.mrp) * 100) : null;
-    const wished = wishlistStore.has(product.id);
+    const inCart = cartStore.has(cartKey(product));
     const related = catalogStore.products
       .filter((p) => p.category === product.category && p.id !== product.id)
       .slice(0, 4);
@@ -546,11 +554,11 @@ export class ProductDetailView extends LitElement {
           ${product.soldOut ? 'Sold Out' : 'Buy Now'}
         </button>
         <button
-          class="wish-btn ${wished ? 'active' : ''}"
-          aria-label="Toggle wishlist"
-          @click=${() => wishlistStore.toggle(product.id)}
+          class="cart-btn ${inCart ? 'added' : ''}"
+          ?disabled=${product.soldOut}
+          @click=${() => this.addToCart(product)}
         >
-          ${wished ? '♥' : '♡'} ${wished ? 'Saved to Wishlist' : 'Add to Wishlist'}
+          ${inCart ? '✓ In Cart' : '🛒 Add to Cart'}
         </button>
       </div>
 

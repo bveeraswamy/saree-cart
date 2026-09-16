@@ -8,7 +8,7 @@ import './components/bottom-nav';
 import './views/home-view';
 import './views/shop-view';
 import './views/product-detail-view';
-import './views/wishlist-view';
+import './views/cart-view';
 import './views/account-view';
 import './views/user-detail-view';
 import './views/product-edit-view';
@@ -20,7 +20,7 @@ type Route =
   | { name: 'home' }
   | { name: 'shop'; category: string }
   | { name: 'product'; id: string }
-  | { name: 'wishlist' }
+  | { name: 'cart' }
   | { name: 'account' }
   | { name: 'userDetail'; username: string }
   | { name: 'productEdit'; id: string }
@@ -42,8 +42,8 @@ function parseRoute(hash: string): Route {
       return segs[1] ? { name: 'product', id: segs[1] } : { name: 'home' };
     case 'checkout':
       return segs[1] ? { name: 'checkout', id: segs[1] } : { name: 'home' };
-    case 'wishlist':
-      return { name: 'wishlist' };
+    case 'cart':
+      return { name: 'cart' };
     case 'account':
       if (segs[1] === 'users' && segs[2]) return { name: 'userDetail', username: segs[2] };
       if (segs[1] === 'inventory' && segs[2] === 'new') return { name: 'productAdd' };
@@ -125,8 +125,8 @@ export class AppShell extends LitElement {
       case 'product':
       case 'checkout':
         return 'shop';
-      case 'wishlist':
-        return 'wishlist';
+      case 'cart':
+        return 'cart';
       case 'account':
       case 'userDetail':
       case 'productEdit':
@@ -148,8 +148,8 @@ export class AppShell extends LitElement {
           showSearch: false,
           label: catalogStore.products.find((p) => p.id === route.id)?.name ?? 'Product',
         };
-      case 'wishlist':
-        return { showBack: false, showSearch: false, label: 'Wishlist' };
+      case 'cart':
+        return { showBack: false, showSearch: false, label: 'Your Cart' };
       case 'account':
         return { showBack: false, showSearch: false, label: 'Account' };
       case 'userDetail':
@@ -196,8 +196,8 @@ export class AppShell extends LitElement {
         return html`<shop-view .categoryId=${this.route.category} .query=${this.searchQuery}></shop-view>`;
       case 'product':
         return html`<product-detail-view .productId=${this.route.id}></product-detail-view>`;
-      case 'wishlist':
-        return html`<wishlist-view></wishlist-view>`;
+      case 'cart':
+        return html`<cart-view></cart-view>`;
       case 'account':
         return html`<account-view></account-view>`;
       case 'userDetail':
